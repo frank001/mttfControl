@@ -1,0 +1,14 @@
+#include "tcpsocket.h"
+#include <QTcpServer>
+#include <QTcpSocket>
+
+#include <QObject>
+#include <QHostAddress>
+#include <QString>
+#include <QDebug>
+
+tcpsocket::tcpsocket() {
+ 
+}
+
+

@@ -1,0 +1,23 @@
+#ifndef TCPSOCKET_H
+#define TCPSOCKET_H
+#include <QTcpServer>
+#include <QTcpSocket>
+#include <QAbstractSocket>
+
+#include <QObject>
+#include <QHostAddress>
+#include <QString>
+#include <QDebug>
+#include "client.h"
+
+
+class tcpsocket
+{
+private:
+    
+
+public:
+    
+};
+
+#endif // TCPSOCKET_H

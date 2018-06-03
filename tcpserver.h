@@ -1,11 +1,36 @@
-#ifndef TCPSOCKET_H
-#define TCPSOCKET_H
+#ifndef TCPSERVER_H
+#define TCPSERVER_H
+#include <QObject>
+#include <QTcpServer>
+#include <QTcpSocket>
+#include <QAbstractSocket>
 
+#include <QObject>
+#include <QHostAddress>
+#include <QString>
+#include <QDebug>
+#include "tcpclient.h"
+#include "config.h"
 
-class tcpsocket
+class tcpServer : public QTcpServer
 {
+    Q_OBJECT
+
+private:
+    QJsonObject *cfg;
+
 public:
-    tcpsocket();
+    explicit tcpServer(QObject *parent = nullptr);
+    void startServer(QJsonObject *);
+
+protected:
+    void incomingConnection(qintptr socketDescriptor);
+
+signals:
+
+public slots:
+
+
 };
 
-#endif // TCPSOCKET_H
+#endif // TCPSERVER_H
