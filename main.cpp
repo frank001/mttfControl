@@ -14,7 +14,7 @@
 #include "tcpserver.h"
 
 
-dbObject *db = new dbObject("mttfControl", "ek4430pl");
+dbObject *db = new dbObject("mttfControl", "topsecret");
 logger *Log = new logger(db);
 Config *cfg = new Config(Log, db);
 uart *serial;
@@ -40,6 +40,7 @@ int main(int argc, char *argv[]) {
     /*while (true) {
         QThread::currentThread()->sleep(10);
     }*/
+    //git test
 
     return a.exec();
 }
