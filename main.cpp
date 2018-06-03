@@ -40,6 +40,7 @@ int main(int argc, char *argv[]) {
     /*while (true) {
         QThread::currentThread()->sleep(10);
     }*/
+    //git test
 
     return a.exec();
 }
