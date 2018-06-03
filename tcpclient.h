@@ -13,7 +13,7 @@ class tcpClient : public QObject
     Q_OBJECT
 public:
     explicit tcpClient(QObject *parent = nullptr);
-    void setConfig(QJsonObject *);
+    void setConfig(QJsonObject);
     void setSocket(qintptr Descriptor);
 
 signals:
@@ -26,7 +26,7 @@ public slots:
 
 private:
     QTcpSocket *socket;
-    QJsonObject *cfg;
+    QJsonObject cfg;
 
 };
 

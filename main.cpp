@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
     socket = new tcpServer();
 
 
-    socket->startServer(cfg->getConfig());
+    socket->startServer(cfg->cfg);
 
     serial = new uart(cfg);
 

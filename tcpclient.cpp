@@ -4,7 +4,7 @@ tcpClient::tcpClient(QObject *parent) : QObject(parent) {
     QThreadPool::globalInstance()->setMaxThreadCount(5);
 
 }
-void tcpClient::setConfig(QJsonObject *config) {
+void tcpClient::setConfig(QJsonObject config) {
     cfg=config;
 }
 void tcpClient::setSocket(qintptr descriptor){
@@ -34,7 +34,7 @@ void tcpClient::readyRead() {
     // Time consumer
     QByteArray ba = socket->readAll();
     tcpTask *tcptask = new tcpTask(ba);
-    tcptask->setConfig(cfg);
+    tcptask->setConfig(&cfg);
     tcptask->setAutoDelete(true);
 
     // using queued connection

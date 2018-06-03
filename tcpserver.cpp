@@ -13,7 +13,7 @@ tcpServer::tcpServer(QObject *parent) : QTcpServer(parent) {
 }
 
 
-void tcpServer::startServer(QJsonObject *config) {
+void tcpServer::startServer(QJsonObject config) {
     cfg = config;
     if(listen(QHostAddress::Any, 1337)) {
         qDebug() << "Server: started";
