@@ -24,8 +24,9 @@ void tcpTask::run() {
     QString msg = QString::fromUtf8(data.data());
     qInfo() << msg;
 
-    //Config *c = getConfig();
-    emit getState();
+    Config *c = getConfig();
+
+    //emit getState();
 
     int iNumber = 0;
     for(int i = 0; i < 100; i++) {
@@ -33,11 +34,11 @@ void tcpTask::run() {
     }
 
     qDebug() << "Task done";
-    //QJsonDocument jdConfig(*c->joConfig);
-    //QByteArray ba = jdConfig.toJson();
+    QJsonDocument jdConfig(*c->joConfig);
+    QByteArray ba = jdConfig.toJson();
 
 
-    emit Result(data);
+    emit Result(ba);
 }
 
 QByteArray tcpTask::getData(){

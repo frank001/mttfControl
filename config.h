@@ -11,7 +11,7 @@ private:
     int mLogLevel=0;
     int mVibrate=0;
 
-    int mBaudRate=9600;
+    int mBaudRate=115200;
     int mDataBits=8;
     int mStopBits=1;
     char mParity ='n';

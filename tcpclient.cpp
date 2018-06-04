@@ -36,8 +36,8 @@ void tcpClient::readyRead() {
     QByteArray ba = socket->readAll();
     tcpTask *tcptask = new tcpTask(ba);
 
-    connect(tcptask, &tcpTask::getState, this->cfg, &Config::getState);
-    connect(this->cfg, &Config::setState, tcptask, &tcpTask::setState);
+    //connect(tcptask, &tcpTask::getState, this->cfg, &Config::getState);
+    //connect(this->cfg, &Config::setState, tcptask, &tcpTask::setState);
 
     tcptask->setConfig(cfg);
     tcptask->setAutoDelete(true);
