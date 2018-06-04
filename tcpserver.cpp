@@ -8,13 +8,12 @@
 #include <QDebug>
 #include "config.h"
 
-tcpServer::tcpServer(QObject *parent) : QTcpServer(parent) {
-
+tcpServer::tcpServer(Config *parent) : QTcpServer(parent) {
+    cfg = parent;
 }
 
 
-void tcpServer::startServer(QJsonObject config) {
-    cfg = config;
+void tcpServer::startServer() {
     if(listen(QHostAddress::Any, 1337)) {
         qDebug() << "Server: started";
     } else {

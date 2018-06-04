@@ -10,8 +10,9 @@ tcpTask::tcpTask(QByteArray data) {
     qInfo() << "tcpTask();";
 
 
+
 }
-void tcpTask::setConfig(QJsonObject *config) {
+void tcpTask::setConfig(Config *config) {
     cfg = config;
 }
 void tcpTask::run() {
@@ -23,7 +24,8 @@ void tcpTask::run() {
     QString msg = QString::fromUtf8(data.data());
     qInfo() << msg;
 
-    QJsonObject *c = getConfig();
+    //Config *c = getConfig();
+    emit getState();
 
     int iNumber = 0;
     for(int i = 0; i < 100; i++) {
@@ -31,16 +33,25 @@ void tcpTask::run() {
     }
 
     qDebug() << "Task done";
-    //QJsonDocument jdConfig(c);
+    //QJsonDocument jdConfig(*c->joConfig);
     //QByteArray ba = jdConfig.toJson();
 
 
-    emit Result(msg);
+    emit Result(data);
 }
 
 QByteArray tcpTask::getData(){
     return Data;
 }
-QJsonObject *tcpTask::getConfig(){
+
+Config *tcpTask::getConfig(){
     return cfg;
+}
+/*void tcpTask::getState() {
+    emit(getState());
+}*/
+
+void tcpTask::setState(QString msg) {
+    int i=0;
+    i++;
 }

@@ -10,17 +10,21 @@ class tcpTask : public QObject, public QRunnable {
 public:
     QByteArray Data;
     tcpTask(QByteArray data);
-    void setConfig(QJsonObject *);
+    void setConfig(Config *);
 
 public slots:
     QByteArray getData();
-    QJsonObject *getConfig();
+    Config *getConfig();
+    void setState(QString msg);
 signals:
     void Result(QString);
+    void getState();
+
 protected:
     void run();
-    QJsonObject *cfg;
+    Config *cfg;
 
 };
+
 
 #endif // TCPTASK_H

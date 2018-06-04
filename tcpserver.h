@@ -17,11 +17,11 @@ class tcpServer : public QTcpServer
     Q_OBJECT
 
 private:
-    QJsonObject cfg;
+    Config *cfg;
 
 public:
-    explicit tcpServer(QObject *parent = nullptr);
-    void startServer(QJsonObject);
+    explicit tcpServer(Config *parent = nullptr);
+    void startServer();
 
 protected:
     void incomingConnection(qintptr socketDescriptor);

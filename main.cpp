@@ -14,7 +14,7 @@
 #include "tcpserver.h"
 
 
-dbObject *db = new dbObject("mttfControl", "topsecret");
+dbObject *db = new dbObject("mttfControl", "topSecret");
 logger *Log = new logger(db);
 Config *cfg = new Config(Log, db);
 uart *serial;
@@ -26,10 +26,10 @@ int main(int argc, char *argv[]) {
 
     cfg->setConfig(db->execute("select top 1 * from currentState order by id desc;"));
 
-    socket = new tcpServer();
+    socket = new tcpServer(cfg);
 
 
-    socket->startServer(cfg->cfg);
+    socket->startServer();
 
     serial = new uart(cfg);
 

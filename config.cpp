@@ -7,7 +7,7 @@
 #include "logger.h"
 #include "dbobject.h"
 
-Config::Config() {}
+//Config::Config() {}
 Config::Config(logger *l, dbObject *database) {
     log = l;
     db = database;
@@ -15,13 +15,20 @@ Config::Config(logger *l, dbObject *database) {
 }
 
 void Config::setConfig(QJsonArray ja) {
+    joConfig = new QJsonObject();
+    joConfig->insert("loglevel", mLogLevel);
+    joConfig->insert("baudrate", mBaudRate);
+    joConfig->insert("databits", mDataBits);
+    joConfig->insert("stopbits", mStopBits);
+    joConfig->insert("parity", mParity);
+    joConfig->insert("port", mPortName);
+    joState = new QJsonObject();
+    joState->insert("vibrate", mVibrate);
 
     if (ja.count()==0) {    //create default state record
+       //QJsonDocument jdConfig(cfg);
 
 
-
-
-        //QJsonDocument jdConfig(cfg);
 
         log->message(0,"Creating default state record.");
         db->execute("insert into currentState (config, state) values('','');");
@@ -35,41 +42,41 @@ void Config::setConfig(QJsonArray ja) {
         QString config = currentState["config"].toString();
         QJsonDocument curConfig = QJsonDocument::fromJson(config.toUtf8());
 
-        mLogLevel = curConfig["logLevel"].toInt();
-        mPortName = curConfig["port"].toString();
-        mBaudRate = curConfig["baudrate"].toInt();
-        mDataBits = curConfig["databits"].toInt();
-        mStopBits = curConfig["stopbits"].toInt();
-        mParity = curConfig["parity"].toInt();
+        //TODO: create function to change variables syncing the objects joConfig and joState
+        mLogLevel = curConfig["loglevel"].toInt(); joConfig->value("loglevel") = mLogLevel;
+        mPortName = curConfig["port"].toString(); joConfig->value("port") = mPortName;
+        mBaudRate = curConfig["baudrate"].toInt(); joConfig->value("baudrate") = mBaudRate;
+        mDataBits = curConfig["databits"].toInt(); joConfig->value("databits") = mDataBits;
+        mStopBits = curConfig["stopbits"].toInt(); joConfig->value("stopbits") = mStopBits;
+        mParity = curConfig["parity"].toInt(); joConfig->value("parity") = mParity;
 
 
         QString state = currentState["state"].toString();
         QJsonDocument curState = QJsonDocument::fromJson(state.toUtf8());
-        mVibrate = curState["vibrate"].toInt();
+
+
+        mVibrate = curState["vibrate"].toInt(); joState->value("vibrate") = mVibrate;
 
         int i=0;
         i++;
     }
+
     log->message(0,"Configuration complete.");
 }
 
 void Config::writeConfig() {
 
-    cfg["logLevel"] = mLogLevel;
-    cfg["baudrate"] = mBaudRate;
-    cfg["databits"] = mDataBits;
-    cfg["stopbits"] = mStopBits;
-    cfg["parity"] = mParity;
-    cfg["port"] = mPortName;
 
-    QJsonDocument jdConfig(cfg);
+
+    QJsonDocument jdConfig(*joConfig);
     db->saveState("config", jdConfig);
     log->message(0, "Configuration saved: " +jdConfig.toJson());
 }
 
 void Config::writeState() {
-    state["vibrate"] = mVibrate;
-    QJsonDocument jdState(state);
+
+
+    QJsonDocument jdState(*joState);
     db->saveState("state", jdState);
     log->message(0, "State saved: "+ jdState.toJson());
 }
@@ -87,7 +94,19 @@ void Config::setVibrate(int OnOff) {
 }
 
 QJsonObject *Config::getConfig(){
+
     //QJsonDocument jdConfig(cfg);
     //return jdConfig.toJson();
-    return &cfg;
+    return joConfig;
 }
+void Config::getState() {
+
+    emit(setState("State object"));
+}
+/*
+void Config::setState(QString msg) {
+    int i=0;
+    i++;
+}*/
+
+

@@ -6,6 +6,7 @@
 #include <QThreadPool>
 #include "tcpTask.h"
 #include "config.h"
+//#include "tcpserver.h"
 
 
 class tcpClient : public QObject
@@ -13,7 +14,7 @@ class tcpClient : public QObject
     Q_OBJECT
 public:
     explicit tcpClient(QObject *parent = nullptr);
-    void setConfig(QJsonObject);
+    void setConfig(Config *);
     void setSocket(qintptr Descriptor);
 
 signals:
@@ -24,10 +25,11 @@ public slots:
     void readyRead();
     void taskResult(QString);
 
+
 private:
     QTcpSocket *socket;
-    QJsonObject cfg;
-
+    Config *cfg;
+    QObject *Parent;
 };
 
 #endif // TCPCLIENT_H

@@ -1,10 +1,11 @@
 #include "tcpclient.h"
 
 tcpClient::tcpClient(QObject *parent) : QObject(parent) {
+    Parent = parent;
     QThreadPool::globalInstance()->setMaxThreadCount(5);
 
 }
-void tcpClient::setConfig(QJsonObject config) {
+void tcpClient::setConfig(Config *config) {
     cfg=config;
 }
 void tcpClient::setSocket(qintptr descriptor){
@@ -34,7 +35,11 @@ void tcpClient::readyRead() {
     // Time consumer
     QByteArray ba = socket->readAll();
     tcpTask *tcptask = new tcpTask(ba);
-    tcptask->setConfig(&cfg);
+
+    connect(tcptask, &tcpTask::getState, this->cfg, &Config::getState);
+    connect(this->cfg, &Config::setState, tcptask, &tcpTask::setState);
+
+    tcptask->setConfig(cfg);
     tcptask->setAutoDelete(true);
 
     // using queued connection
@@ -48,8 +53,9 @@ void tcpClient::readyRead() {
 }
 void tcpClient::taskResult(QString result) {
     QByteArray Buffer;
-    Buffer.append("\r\nTask result = ");
+    //Buffer.append("\r\nTask result = ");
     Buffer.append(result);
 
     socket->write(Buffer);                      //Read results from the task.
 }
+

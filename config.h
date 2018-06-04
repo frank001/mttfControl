@@ -3,8 +3,10 @@
 #include <QJsonObject>
 #include "logger.h"
 #include "dbobject.h"
-class Config
+class Config : public QObject
 {
+     Q_OBJECT
+
 private:
     int mLogLevel=0;
     int mVibrate=0;
@@ -18,10 +20,11 @@ private:
     logger *log;
     dbObject *db;
 
-    QJsonObject state;
+    QJsonObject *joState;
 
 public:
-    Config();
+    explicit Config(QObject *parent = nullptr);
+
     Config(logger *, dbObject *);
     int logLevel();
     int logLevel(int level);
@@ -29,14 +32,17 @@ public:
     void setVibrate(int);
     void writeConfig();
     void writeState();
-    QJsonObject cfg;
+    QJsonObject *joConfig;
+
 
 public slots:
 
     QJsonObject *getConfig();
-
+    void getState();
     //void read(const QJsonObject &json);
     //void write(const QJsonObject &json);
+signals:
+    void setState(QString msg);
 };
 
 #endif // CONFIG_H
