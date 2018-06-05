@@ -4,13 +4,15 @@
 #include <QObject>
 #include <QRunnable>
 #include "config.h"
+#include "commands.h"
 
 class tcpTask : public QObject, public QRunnable {
     Q_OBJECT
 public:
     QByteArray Data;
-    tcpTask(QByteArray data);
+    tcpTask(Config *parent, QByteArray data);
     void setConfig(Config *);
+    Commands command;
 
 public slots:
     QByteArray getData();

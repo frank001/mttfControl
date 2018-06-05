@@ -23,7 +23,8 @@ SOURCES += \
     uart.cpp \
     tcpserver.cpp \
     tcpclient.cpp \
-    tcptask.cpp
+    tcptask.cpp \
+    commands.cpp
 
 HEADERS += \
     dbobject.h \
@@ -33,7 +34,8 @@ HEADERS += \
     uart.h \
     tcpserver.h \
     tcpclient.h \
-    tcptask.h
+    tcptask.h \
+    commands.h
 
 unix|win32: LIBS += -lQt5Sql
 

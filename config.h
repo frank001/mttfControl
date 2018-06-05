@@ -3,8 +3,9 @@
 #include <QJsonObject>
 #include "logger.h"
 #include "dbobject.h"
-class Config : public QObject
-{
+
+
+class Config : public QObject {
      Q_OBJECT
 
 private:

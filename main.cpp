@@ -19,6 +19,9 @@ logger *Log = new logger(db);
 Config *cfg = new Config(Log, db);
 uart *serial;
 tcpServer *socket;
+Commands cmd;
+
+
 
 int main(int argc, char *argv[]) {
     QCoreApplication a(argc, argv);
@@ -27,6 +30,7 @@ int main(int argc, char *argv[]) {
     cfg->setConfig(db->execute("select top 1 * from currentState order by id desc;"));
 
     socket = new tcpServer(cfg);
+
 
 
     socket->startServer();

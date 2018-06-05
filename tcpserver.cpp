@@ -10,6 +10,7 @@
 
 tcpServer::tcpServer(Config *parent) : QTcpServer(parent) {
     cfg = parent;
+
 }
 
 
@@ -24,7 +25,7 @@ void tcpServer::startServer() {
 void tcpServer::incomingConnection(qintptr socketDescriptor) {
     // At the incoming connection, make a client
         // and set the socket
-    tcpClient *client = new tcpClient(this);
-    client->setConfig(cfg);
+    tcpClient *client = new tcpClient(cfg);
+    //client->setConfig(cfg);
     client->setSocket(socketDescriptor);
 }

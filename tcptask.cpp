@@ -4,17 +4,17 @@
 #include <QTextCodec>
 #include "config.h"
 #include <QJsonDocument>
+#include "commands.h"
 
-tcpTask::tcpTask(QByteArray data) {
+tcpTask::tcpTask(Config *parent, QByteArray data) {
+    cfg = parent;
     Data = data;
     qInfo() << "tcpTask();";
 
 
 
 }
-void tcpTask::setConfig(Config *config) {
-    cfg = config;
-}
+
 void tcpTask::run() {
     // time consumer
 
@@ -23,6 +23,8 @@ void tcpTask::run() {
     //QString msg = QTextCodec::codecForMib(106)->toUnicode(data);
     QString msg = QString::fromUtf8(data.data());
     qInfo() << msg;
+
+    command.Handle(msg);
 
     Config *c = getConfig();
 

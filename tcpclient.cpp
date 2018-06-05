@@ -1,13 +1,11 @@
 #include "tcpclient.h"
 
-tcpClient::tcpClient(QObject *parent) : QObject(parent) {
-    Parent = parent;
+tcpClient::tcpClient(Config *parent) : QObject(parent) {
+    cfg = parent;
     QThreadPool::globalInstance()->setMaxThreadCount(5);
 
 }
-void tcpClient::setConfig(Config *config) {
-    cfg=config;
-}
+
 void tcpClient::setSocket(qintptr descriptor){
     socket = new QTcpSocket(this);
     qInfo() << "Socket created";
@@ -34,12 +32,12 @@ void tcpClient::readyRead() {
 
     // Time consumer
     QByteArray ba = socket->readAll();
-    tcpTask *tcptask = new tcpTask(ba);
+    tcpTask *tcptask = new tcpTask(cfg, ba);
 
     //connect(tcptask, &tcpTask::getState, this->cfg, &Config::getState);
     //connect(this->cfg, &Config::setState, tcptask, &tcpTask::setState);
 
-    tcptask->setConfig(cfg);
+    //tcptask->setConfig(cfg);
     tcptask->setAutoDelete(true);
 
     // using queued connection
