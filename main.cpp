@@ -12,30 +12,48 @@
 #include "config.h"
 #include "uart.h"
 #include "tcpserver.h"
+#include <QThread>
 
 
 dbObject *db = new dbObject("mttfControl", "topSecret");
 logger *Log = new logger(db);
-Config *cfg = new Config(Log, db);
-uart *serial;
-tcpServer *socket;
-Commands cmd;
+//Config *cfg; // = new Config(Log, db);
 
+tcpServer *socket;
+//Commands cmd;
+
+QSerialPort serialPort;
 
 
 int main(int argc, char *argv[]) {
     QCoreApplication a(argc, argv);
+
+    serialPort.setPortName("COM1");
+    serialPort.setBaudRate(QSerialPort::Baud9600);
+    serialPort.open(QIODevice::WriteOnly);
+
+    Config cfg(&serialPort);
+
     Log->message(0, "Accessing database.");
 
-    cfg->setConfig(db->execute("select top 1 * from currentState order by id desc;"));
+    cfg.setConfig(db->execute("select top 1 * from currentState order by id desc;"));
 
-    socket = new tcpServer(cfg);
-
-
-
+    socket = new tcpServer(&cfg);
     socket->startServer();
 
-    serial = new uart(cfg);
+
+    serialPort.setPortName("COM1");
+    serialPort.setBaudRate(QSerialPort::Baud9600);
+    serialPort.open(QIODevice::WriteOnly);
+    cfg.serialPort = &serialPort;
+
+    //uart Writer(&serialPort);
+    //Writer.write("l7\r");
+
+
+
+
+
 
 
     //cfg->setVibrate(0);

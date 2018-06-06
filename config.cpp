@@ -8,9 +8,12 @@
 #include "dbobject.h"
 
 //Config::Config() {}
-Config::Config(logger *l, dbObject *database) {
-    log = l;
-    db = database;
+Config::Config(QSerialPort *port, QObject *parent) :
+    QObject(parent),
+    m_SerialPort(port)
+{
+    //log = l;
+    //db = database;
 
 }
 
@@ -108,5 +111,6 @@ void Config::setState(QString msg) {
     int i=0;
     i++;
 }*/
+void Config::uartWrite() {
 
-
+}

@@ -12,7 +12,10 @@ public:
     QByteArray Data;
     tcpTask(Config *parent, QByteArray data);
     void setConfig(Config *);
-    Commands command;
+    Commands *command;
+private:
+
+
 
 public slots:
     QByteArray getData();

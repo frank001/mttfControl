@@ -8,10 +8,9 @@
 
 tcpTask::tcpTask(Config *parent, QByteArray data) {
     cfg = parent;
+    command = new Commands(cfg);
     Data = data;
     qInfo() << "tcpTask();";
-
-
 
 }
 
@@ -24,7 +23,7 @@ void tcpTask::run() {
     QString msg = QString::fromUtf8(data.data());
     qInfo() << msg;
 
-    command.Handle(msg);
+    command->Handle(msg);
 
     Config *c = getConfig();
 

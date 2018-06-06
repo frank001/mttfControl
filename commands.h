@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QMetaEnum>
+#include "config.h"
+#include "uart.h"
 
 
 class Commands : public QObject
@@ -14,6 +16,9 @@ public:
     explicit Commands(QObject *parent = nullptr);
     enum eCommands { getConfig, setConfig, getState, setState };
 
+
+private:
+    Config *cfg;
 
 signals:
 

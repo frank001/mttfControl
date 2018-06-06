@@ -7,9 +7,10 @@
 #include <QString>
 #include <QDebug>
 #include "config.h"
-
+#include "uart.h"
 tcpServer::tcpServer(Config *parent) : QTcpServer(parent) {
     cfg = parent;
+    //uart(parent->serialPort).write(("l7\r"));
 
 }
 

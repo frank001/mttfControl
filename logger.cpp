@@ -16,7 +16,7 @@ void logger::message(unsigned char level, QString text) {
     QByteArray ba = now.toLatin1();
     const char *c_str = ba.data();
     qInfo() << c_str;
-    db->execute("insert into logControl (level, message) values (0,'" + now +"');");
+    //db->execute("insert into logControl (level, message) values (0,'" + now +"');");
 
 }
 
