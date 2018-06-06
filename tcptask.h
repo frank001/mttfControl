@@ -10,7 +10,7 @@ class tcpTask : public QObject, public QRunnable {
     Q_OBJECT
 public:
     QByteArray Data;
-    tcpTask(Config *parent, QByteArray data);
+    tcpTask(Config *, QByteArray data);
     void setConfig(Config *);
     Commands *command;
 private:
@@ -20,14 +20,17 @@ private:
 public slots:
     QByteArray getData();
     Config *getConfig();
+
     void setState(QString msg);
+
 signals:
     void Result(QString);
     void getState();
+    void message(unsigned char level, QString msg);
 
 protected:
     void run();
-    Config *cfg;
+    Config *m_Config;
 
 };
 

@@ -5,18 +5,18 @@
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
 #include <QJsonArray>
-class dbObject
+class Logger
 {
 private:
     QSqlDatabase db;
 
 public:
-    dbObject(QString, QString);
+    Logger(QString, QString);
     QString ErrorText;
     QJsonArray execute(QString);
     QSqlQuery *query;
     void saveState(QString, QJsonDocument);
-
+    void message(unsigned char level, QString text);
 
 };
 

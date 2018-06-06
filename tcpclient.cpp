@@ -1,59 +1,47 @@
 #include "tcpclient.h"
 
-tcpClient::tcpClient(Config *parent) : QObject(parent) {
-    cfg = parent;
+tcpClient::tcpClient(Config *config, QObject *parent) : QObject(parent), m_Config(config) {
     QThreadPool::globalInstance()->setMaxThreadCount(5);
-
 }
 
 void tcpClient::setSocket(qintptr descriptor){
     socket = new QTcpSocket(this);
-    qInfo() << "Socket created";
+    m_Config->message(0, "Socket created.");
+
     connect(socket, SIGNAL(connected()), this, SLOT(connected()));
     connect(socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
     connect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
 
     socket->setSocketDescriptor(descriptor);
-
-    qDebug() << "Client connected at " << descriptor;
+    m_Config->message(0, "Client connected at port " + QString::number(descriptor));
 }
 
 void tcpClient::connected() {   //async
-    qDebug() << "Client connected event";
+    m_Config->message(0, "Client connected event");
 }
 
 void tcpClient::disconnected() { //async
-    qDebug() << "Client disconnected";
+    m_Config->message(0, "Client disconnected");
 }
 
 void tcpClient::readyRead() {
-    qDebug() << "MyClient::readyRead()";
-    //qDebug() << socket->readAll();              // Read commands from client at this point
+    m_Config->message(0, "Client data received.");
 
-    // Time consumer
     QByteArray ba = socket->readAll();
-    tcpTask *tcptask = new tcpTask(cfg, ba);
+    tcpTask *tcptask = new tcpTask(m_Config, ba);
 
-    //connect(tcptask, &tcpTask::getState, this->cfg, &Config::getState);
-    //connect(this->cfg, &Config::setState, tcptask, &tcpTask::setState);
-
-    //tcptask->setConfig(cfg);
     tcptask->setAutoDelete(true);
 
-    // using queued connection
     connect(tcptask, SIGNAL(Result(QString)), this, SLOT(taskResult(QString)), Qt::QueuedConnection);
 
-    qDebug() << "Starting a new task using a thread from the QThreadPool";
-
-    // QThreadPool::globalInstance() returns global QThreadPool instance
+    m_Config->message(0, "Spawning thread from QThreadPool");
     QThreadPool::globalInstance()->start(tcptask);
 
 }
 void tcpClient::taskResult(QString result) {
     QByteArray Buffer;
-    //Buffer.append("\r\nTask result = ");
     Buffer.append(result);
-
-    socket->write(Buffer);                      //Read results from the task.
+    m_Config->message(0, "Reporting result to client:" + result);
+    socket->write(Buffer);
 }
 

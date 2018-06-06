@@ -7,7 +7,7 @@
 #include <QTextStream>
 #include <QTimer>
 
-#include "config.h"
+//#include "config.h"
 
 class uart : public QObject
 {
@@ -28,7 +28,7 @@ public:
 
 
 private:
-    Config *cfg;
+    //Config *cfg;
     QList<QSerialPortInfo> ports;
     QSerialPort *m_serialPort = nullptr;
 

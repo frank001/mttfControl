@@ -17,10 +17,10 @@ class tcpServer : public QTcpServer
     Q_OBJECT
 
 private:
-    Config *cfg;
+    Config *m_Config;
 
 public:
-    explicit tcpServer(Config *parent = nullptr);
+    explicit tcpServer(Config *config = nullptr, QObject *parent = nullptr);
     void startServer();
 
 protected:

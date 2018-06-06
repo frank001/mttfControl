@@ -18,7 +18,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
     dbobject.cpp \
-    logger.cpp \
     config.cpp \
     uart.cpp \
     tcpserver.cpp \
@@ -28,7 +27,6 @@ SOURCES += \
 
 HEADERS += \
     dbobject.h \
-    logger.h \
     main.h \
     config.h \
     uart.h \

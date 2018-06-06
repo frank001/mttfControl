@@ -2,7 +2,6 @@
 #define CONFIG_H
 #include <QJsonObject>
 #include <QtSerialPort/QSerialPort>
-#include "logger.h"
 #include "dbobject.h"
 #include "uart.h"
 
@@ -19,8 +18,7 @@ private:
     char mParity ='n';
     QString mPortName="COM1";
 
-    logger *log;
-    dbObject *db;
+    Logger *m_dbObject;
 
     QJsonObject *joState;
     QSerialPort m_SerialPort;
@@ -28,7 +26,7 @@ private:
 
 public:
     //explicit Config(QObject *parent = nullptr);
-    explicit Config(QSerialPort *port, QObject *parent = nullptr);
+    explicit Config(QSerialPort *port, Logger *database, QObject *parent = nullptr);
 
     //Config(logger *, dbObject *);
     int logLevel();
@@ -47,7 +45,7 @@ public slots:
     //void read(const QJsonObject &json);
     //void write(const QJsonObject &json);
     void uartWrite();
-
+    void message(unsigned char, QString);
 signals:
     void setState(QString msg);
 };

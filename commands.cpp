@@ -1,16 +1,14 @@
 #include "commands.h"
 //#include <QMetaObject>
 #include <QMetaEnum>
+#include "config.h"
 #include "uart.h"
 
-Commands::Commands(QObject *parent) : QObject(parent) {
-    int i=0;
-    i++;
-    //cfg = parent;
-
-
-    //switchString("getConfig");
-    //switchString("setConfig");
+Commands::Commands(Config *config, QObject *parent) :
+    QObject(parent),
+    m_Config(config)
+{
+    connect(this, &Commands::message, m_Config, &Config::message);
 }
 
 void Commands::Handle(QString word){
@@ -19,21 +17,27 @@ void Commands::Handle(QString word){
     QMetaEnum MetaEnum = MetaObject.enumerator(MetaObject.indexOfEnumerator("eCommands"));
 
     //Writer.write("l7\r");
-
+    message(0, "Command received: " + word);
     int i=0;
     int j=0;
     switch (MetaEnum.keysToValue(word.toLatin1())) {
     case getConfig:
+        message(0, "Returning config: (TODO)");   //TODO
         i++;
-
         break;
     case setConfig:
+        message(0, "Setting config: (TODO)");   //TODO
         j++;
 
         break;
     case getState:
+        message(0, "Returning state: (TODO)");   //TODO
         break;
     case setState:
+        message(0, "Setting state: (TODO)");   //TODO
+        break;
+    default:
+        message(0, "Unknown command: " + word);
         break;
 
     }

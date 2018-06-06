@@ -8,25 +8,26 @@
 #include <QDebug>
 #include "config.h"
 #include "uart.h"
-tcpServer::tcpServer(Config *parent) : QTcpServer(parent) {
-    cfg = parent;
+tcpServer::tcpServer(Config *config, QObject *parent) : QTcpServer(parent), m_Config(config)
+{
     //uart(parent->serialPort).write(("l7\r"));
-
 }
 
 
 void tcpServer::startServer() {
     if(listen(QHostAddress::Any, 1337)) {
-        qDebug() << "Server: started";
+        m_Config->message(0, "TCP Server: started");
     } else {
-        qDebug() << "Server: not started!";
+        m_Config->message(0, "TCP Server: not started!");
     }
 }
 
 void tcpServer::incomingConnection(qintptr socketDescriptor) {
     // At the incoming connection, make a client
         // and set the socket
-    tcpClient *client = new tcpClient(cfg);
+
+    m_Config->message(0, "Client connecting.");
+    tcpClient *client = new tcpClient(m_Config);
     //client->setConfig(cfg);
     client->setSocket(socketDescriptor);
 }

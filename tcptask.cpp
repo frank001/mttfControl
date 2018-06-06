@@ -6,26 +6,26 @@
 #include <QJsonDocument>
 #include "commands.h"
 
-tcpTask::tcpTask(Config *parent, QByteArray data) {
-    cfg = parent;
-    command = new Commands(cfg);
-    Data = data;
-    qInfo() << "tcpTask();";
-
+tcpTask::tcpTask(Config *config, QByteArray data) :
+    m_Config(config),
+    Data(data)
+{
+    command = new Commands(m_Config);
+    connect(this, &tcpTask::message, m_Config, &Config::message);
+    m_Config->message(0, "tcpTask initialized.");
 }
 
 void tcpTask::run() {
     // time consumer
-
-    qInfo() << "Task started";
+    Config *c = getConfig();
+    message(0, "Task started.");       //TODO: create SLOTS/SIGNALS between tasks and Handler. Done.
     QByteArray data = getData();
-    //QString msg = QTextCodec::codecForMib(106)->toUnicode(data);
     QString msg = QString::fromUtf8(data.data());
-    qInfo() << msg;
+
 
     command->Handle(msg);
 
-    Config *c = getConfig();
+
 
     //emit getState();
 
@@ -34,7 +34,7 @@ void tcpTask::run() {
         iNumber += 1;
     }
 
-    qDebug() << "Task done";
+    message(0, "Task done");
     QJsonDocument jdConfig(*c->joConfig);
     QByteArray ba = jdConfig.toJson();
 
@@ -47,7 +47,7 @@ QByteArray tcpTask::getData(){
 }
 
 Config *tcpTask::getConfig(){
-    return cfg;
+    return m_Config;
 }
 /*void tcpTask::getState() {
     emit(getState());
@@ -57,3 +57,4 @@ void tcpTask::setState(QString msg) {
     int i=0;
     i++;
 }
+

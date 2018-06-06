@@ -6,21 +6,24 @@
 #include <QtSql/QSqlRecord>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QDateTime>
 
 #include "dbobject.h"
 
 
-dbObject::dbObject(QString name, QString password) {
+Logger::Logger(QString name, QString password) {
     db = QSqlDatabase::addDatabase("QODBC3");
     db.setDatabaseName("DRIVER={SQL Server};Server=localhost\\SQLEXPRESS;Database=mttf;Uid="+name+";Pwd="+password+";");
+    this->message(0, "Logger start " + QDateTime::currentDateTime().toUTC().toString());
+
 }
 
-QJsonArray dbObject::execute(QString sql) {
+QJsonArray Logger::execute(QString sql) {
     QJsonArray records;
     if (db.open()) {
         query = new QSqlQuery;
         query->prepare(sql);
-        if (!query->exec()) {   //an error occured      //TODO: review this!!!! NOT WORKING
+        if (!query->exec()) {   //an error occured      //TODO: review this!!!! NOT WORKING... or is it? when accessing from wrong thread it stops here...
             QSqlError err = db.lastError();
             ErrorText = err.text().replace("\\","\\\\");
             exit(EXIT_FAILURE);
@@ -47,7 +50,16 @@ QJsonArray dbObject::execute(QString sql) {
     return records;
 }
 
-void dbObject::saveState(QString field, QJsonDocument jd) {
+void Logger::saveState(QString field, QJsonDocument jd) {
     execute("update currentState set "+field+" = '"+ jd.toJson() +"' where id=(select max(id) from currentState);");
+
+}
+
+void Logger::message(unsigned char level, QString text) {
+    QString now = "[" + QDateTime::currentDateTime().toLocalTime().toString("yyyyMMdd hh:mm:ss") +"]: " + text;
+    QByteArray ba = now.toLatin1();
+    const char *c_str = ba.data();
+    qInfo() << c_str;
+    this->execute("insert into logControl (level, message) values (0,'" + now +"');");
 
 }

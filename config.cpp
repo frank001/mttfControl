@@ -4,12 +4,12 @@
 #include <QVariant>
 
 #include "config.h"
-#include "logger.h"
 #include "dbobject.h"
 
 //Config::Config() {}
-Config::Config(QSerialPort *port, QObject *parent) :
+Config::Config(QSerialPort *port, Logger *database, QObject *parent) :
     QObject(parent),
+    m_dbObject(database),
     m_SerialPort(port)
 {
     //log = l;
@@ -33,8 +33,8 @@ void Config::setConfig(QJsonArray ja) {
 
 
 
-        log->message(0,"Creating default state record.");
-        db->execute("insert into currentState (config, state) values('','');");
+        m_dbObject->message(0,"Creating default state record.");
+        m_dbObject->execute("insert into currentState (config, state) values('','');");
         writeConfig();
         writeState();
 
@@ -64,7 +64,7 @@ void Config::setConfig(QJsonArray ja) {
         i++;
     }
 
-    log->message(0,"Configuration complete.");
+    m_dbObject->message(0,"Configuration complete.");
 }
 
 void Config::writeConfig() {
@@ -72,23 +72,23 @@ void Config::writeConfig() {
 
 
     QJsonDocument jdConfig(*joConfig);
-    db->saveState("config", jdConfig);
-    log->message(0, "Configuration saved: " +jdConfig.toJson());
+    m_dbObject->saveState("config", jdConfig);
+    m_dbObject->message(0, "Configuration saved: " +jdConfig.toJson());
 }
 
 void Config::writeState() {
 
 
     QJsonDocument jdState(*joState);
-    db->saveState("state", jdState);
-    log->message(0, "State saved: "+ jdState.toJson());
+    m_dbObject->saveState("state", jdState);
+    m_dbObject->message(0, "State saved: "+ jdState.toJson());
 }
 
 
 int Config::logLevel() { return mLogLevel; } //TODO: Review/remove this
 int Config::logLevel(int level) {
     mLogLevel = level;
-    log->message(0,"Log Level changed to: " + QString::number(level));
+    m_dbObject->message(0,"Log Level changed to: " + QString::number(level));
     return mLogLevel;
 }
 void Config::setVibrate(int OnOff) {
@@ -113,4 +113,7 @@ void Config::setState(QString msg) {
 }*/
 void Config::uartWrite() {
 
+}
+void Config::message(unsigned char level, QString msg) {
+    m_dbObject->message(level, msg);
 }

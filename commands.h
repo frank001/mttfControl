@@ -13,14 +13,15 @@ class Commands : public QObject
     Q_ENUMS(eCommands)
 
 public:
-    explicit Commands(QObject *parent = nullptr);
+    explicit Commands(Config *, QObject *parent = nullptr);
     enum eCommands { getConfig, setConfig, getState, setState };
 
 
 private:
-    Config *cfg;
+    Config *m_Config;
 
 signals:
+    void message(unsigned char level, QString msg);
 
 public slots:
     void Handle(QString);

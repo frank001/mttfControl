@@ -13,7 +13,7 @@ class tcpClient : public QObject
 {
     Q_OBJECT
 public:
-    explicit tcpClient(Config *parent = nullptr);
+    explicit tcpClient(Config *, QObject *parent = nullptr);
     //void setConfig(Config *);
     void setSocket(qintptr Descriptor);
 
@@ -28,7 +28,7 @@ public slots:
 
 private:
     QTcpSocket *socket;
-    Config *cfg;
+    Config *m_Config;
     //QObject *Parent;
 };
 

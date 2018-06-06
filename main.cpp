@@ -6,7 +6,6 @@
 #include <QJsonDocument>
 #include <QThread>
 
-#include "logger.h"
 #include "dbobject.h"
 #include "main.h"
 #include "config.h"
@@ -15,11 +14,11 @@
 #include <QThread>
 
 
-dbObject *db = new dbObject("mttfControl", "topSecret");
-logger *Log = new logger(db);
+Logger db("mttfControl", "topSecret");
+
 //Config *cfg; // = new Config(Log, db);
 
-tcpServer *socket;
+tcpServer *tcpserver;
 //Commands cmd;
 
 QSerialPort serialPort;
@@ -32,14 +31,14 @@ int main(int argc, char *argv[]) {
     serialPort.setBaudRate(QSerialPort::Baud9600);
     serialPort.open(QIODevice::WriteOnly);
 
-    Config cfg(&serialPort);
+    Config cfg(&serialPort, &db);
 
-    Log->message(0, "Accessing database.");
+    db.message(0, "Accessing database.");
 
-    cfg.setConfig(db->execute("select top 1 * from currentState order by id desc;"));
+    cfg.setConfig(db.execute("select top 1 * from currentState order by id desc;"));
 
-    socket = new tcpServer(&cfg);
-    socket->startServer();
+    tcpserver = new tcpServer(&cfg);
+    tcpserver->startServer();
 
 
     serialPort.setPortName("COM1");
