@@ -3,15 +3,15 @@
 
 #include <QObject>
 #include <QRunnable>
-#include "config.h"
+#include "handler.h"
 #include "commands.h"
 
 class tcpTask : public QObject, public QRunnable {
     Q_OBJECT
 public:
     QByteArray Data;
-    tcpTask(Config *, QByteArray data);
-    void setConfig(Config *);
+    tcpTask(Handler *, QByteArray data);
+    void setConfig(Handler *);
     Commands *command;
 private:
 
@@ -19,7 +19,7 @@ private:
 
 public slots:
     QByteArray getData();
-    Config *getConfig();
+    Handler *getConfig();
 
     void setState(QString msg);
 
@@ -30,7 +30,7 @@ signals:
 
 protected:
     void run();
-    Config *m_Config;
+    Handler *m_Config;
 
 };
 

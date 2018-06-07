@@ -10,17 +10,17 @@
 #include <QString>
 #include <QDebug>
 #include "tcpclient.h"
-#include "config.h"
+#include "handler.h"
 
 class tcpServer : public QTcpServer
 {
     Q_OBJECT
 
 private:
-    Config *m_Config;
+    Handler *m_Config;
 
 public:
-    explicit tcpServer(Config *config = nullptr, QObject *parent = nullptr);
+    explicit tcpServer(Handler *config = nullptr, QObject *parent = nullptr);
     void startServer();
 
 protected:

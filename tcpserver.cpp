@@ -6,9 +6,11 @@
 #include <QHostAddress>
 #include <QString>
 #include <QDebug>
-#include "config.h"
+#include "main.h"
+#include "handler.h"
 #include "uart.h"
-tcpServer::tcpServer(Config *config, QObject *parent) : QTcpServer(parent), m_Config(config)
+
+tcpServer::tcpServer(Handler *config, QObject *parent) : QTcpServer(parent), m_Config(config)
 {
     //uart(parent->serialPort).write(("l7\r"));
 }
@@ -16,9 +18,9 @@ tcpServer::tcpServer(Config *config, QObject *parent) : QTcpServer(parent), m_Co
 
 void tcpServer::startServer() {
     if(listen(QHostAddress::Any, 1337)) {
-        m_Config->message(0, "TCP Server: started");
+        m_Config->message(NETWORK|INFO, "TCP Server: started");
     } else {
-        m_Config->message(0, "TCP Server: not started!");
+        m_Config->message(NETWORK|ERROR, "TCP Server: not started!");
     }
 }
 
@@ -26,7 +28,7 @@ void tcpServer::incomingConnection(qintptr socketDescriptor) {
     // At the incoming connection, make a client
         // and set the socket
 
-    m_Config->message(0, "Client connecting.");
+    m_Config->message(NETWORK|DEBUG, "Client connecting.");
     tcpClient *client = new tcpClient(m_Config);
     //client->setConfig(cfg);
     client->setSocket(socketDescriptor);

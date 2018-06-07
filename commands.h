@@ -3,7 +3,8 @@
 
 #include <QObject>
 #include <QMetaEnum>
-#include "config.h"
+#include <QJsonObject>
+#include "handler.h"
 #include "uart.h"
 
 
@@ -13,19 +14,20 @@ class Commands : public QObject
     Q_ENUMS(eCommands)
 
 public:
-    explicit Commands(Config *, QObject *parent = nullptr);
-    enum eCommands { getConfig, setConfig, getState, setState, setVibrateOn, setVibrateOff };
+    explicit Commands(Handler *, QObject *parent = nullptr);
+    enum eCommands { getConfig, setConfig, getState, setState, setVibrate, setTubes };
 
+    QJsonObject *m_Response;
 
 private:
-    Config *m_Config;
+    Handler *m_Handler;
 
 
 signals:
     void message(unsigned char level, QString msg);
-
+    void writeUart(const QByteArray &writeData);
 public slots:
-    void Handle(QString);
+    QByteArray Handle(QString);
 
 };
 

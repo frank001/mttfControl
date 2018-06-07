@@ -5,24 +5,25 @@
 #include <QThread>
 #include <QDebug>
 #include <QList>
-#include "config.h"
+#include "handler.h"
+#include "main.h"
 
 uart::uart(QSerialPort *port, QObject *parent) :
     QObject(parent),
-    m_serialPort(port),
-    m_standardOutput(stdout) {
+    m_serialPort(port)
+{
+    message(UART|DEBUG, "initializing serial port");
 
-    m_timer.setSingleShot(true);
+    //m_timer = new QTimer();
+    //m_timer->setSingleShot(true);
 
     connect(m_serialPort, &QSerialPort::bytesWritten, this, &uart::handleBytesWritten);
     connect(m_serialPort, &QSerialPort::errorOccurred, this, &uart::handleError);
-    connect(&m_timer, &QTimer::timeout, this, &uart::handleTimeout);
-    /*
-    //cfg = config;
+    //connect(m_timer, &QTimer::timeout, this, &uart::handleTimeout);
 
 
+    /*  SerialPortInfo
 
-    //QSerialPort mSerial = new QSerialPort();
 
     QSerialPortInfo *spi = new QSerialPortInfo();
 
@@ -36,7 +37,7 @@ uart::uart(QSerialPort *port, QObject *parent) :
     QSerialPort(serialPort);
 
 
-    qInfo() << "initializing serial port";
+
     serialPort.setPortName("COM3");
     serialPort.setBaudRate((qint32)9600);
     serialPort.setDataBits((QSerialPort::DataBits)8);
@@ -47,70 +48,36 @@ uart::uart(QSerialPort *port, QObject *parent) :
 
 }
 
-void uart::handleBytesWritten(qint64 bytes)
-{
+void uart::handleBytesWritten(qint64 bytes) {
     m_bytesWritten += bytes;
     if (m_bytesWritten == m_writeData.size()) {
         m_bytesWritten = 0;
-        qInfo() << "Data successfully sent to port";
-                   //QObject::tr("Data successfully sent to port %1")
-                   //         .arg(m_serialPort->portName()) << endl;
-        //QCoreApplication::quit();
-        //QThread::currentThread()->exit(0);
-        //m_timer.stop();
+        message(UART|DEBUG, "Data successfully sent to port: " + QString::number(m_writeData.size()) + " bytes.");
+        //m_timer->stop();
     }
 }
 
-void uart::handleTimeout()
-{
-    qInfo() << "Operation timed out for port";
+void uart::handleTimeout() {
 
-               //QObject::tr("Operation timed out for port %1, error: %2")
-               //         .arg(m_serialPort->portName())
-               //         .arg(m_serialPort->errorString())
-               //      << endl;
-    //QCoreApplication::exit(1);
-    //QThread::currentThread()->exit(1);
-    //QCoreApplication::quit();
+    message(UART|ERROR, "Operation timed out for port");
 }
 
-void uart::handleError(QSerialPort::SerialPortError serialPortError)
-{
+void uart::handleError(QSerialPort::SerialPortError serialPortError) {
     if (serialPortError == QSerialPort::WriteError) {
-        qInfo() << "An I/O error occured while writing";
-                   //QObject::tr("An I/O error occurred while writing"
-                   //                     " the data to port %1, error: %2")
-                   //         .arg(m_serialPort->portName())
-                   //         .arg(m_serialPort->errorString())
-                   //      << endl;
-        //QCoreApplication::exit(1);
-        //QThread::currentThread()->exit(1);
+        message(UART|ERROR, "An I/O error occured while writing");
     }
 }
 
-void uart::write(const QByteArray &writeData)
-{
+void uart::write(const QByteArray &writeData) {
     m_writeData = writeData;
-
+    message(UART|DEBUG, "Writing data to uart: "+writeData);
     const qint64 bytesWritten = m_serialPort->write(writeData);
     m_serialPort->waitForBytesWritten(-1);
 
     if (bytesWritten == -1) {
-        qInfo() << "Failed to write data to port.";
-                   //QObject::tr("Failed to write the data to port %1, error: %2")
-                   //         .arg(m_serialPort->portName())
-                   //         .arg(m_serialPort->errorString())
-                   //      << endl;
-       //QCoreApplication::exit();
+        message(UART|ERROR, "Failed to write data to port.");
     } else if (bytesWritten != m_writeData.size()) {
-        qInfo() << "Failed to write all the data to port";
-                   //QObject::tr("Failed to write all the data to port %1, error: %2")
-                   //         .arg(m_serialPort->portName())
-                   //         .arg(m_serialPort->errorString())
-                   //      << endl;
-        //QThread::currentThread()->exit();
-        //QCoreApplication::exit(1);
+        message(UART|ERROR, "Failed to write all the data to port");
     }
-
-    //m_timer.start(5000);
+    //m_timer->start(1000);
 }

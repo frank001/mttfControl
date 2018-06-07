@@ -2,10 +2,10 @@
 #define CONFIG_H
 #include <QJsonObject>
 #include <QtSerialPort/QSerialPort>
-#include "dbobject.h"
+#include "logger.h"
 #include "uart.h"
 
-class Config : public QObject {
+class Handler : public QObject {
      Q_OBJECT
 
 private:
@@ -20,15 +20,15 @@ private:
 
     Logger *m_dbObject;
 
-    QJsonObject *joState;
+
     QSerialPort m_SerialPort;
 
-    //uart *m_uart;
+
 
 public:
     //explicit Config(QObject *parent = nullptr);
-    explicit Config(QSerialPort *port, Logger *database, QObject *parent = nullptr);
-
+    explicit Handler(QSerialPort *port, Logger *database, QObject *parent = nullptr);
+    uart *m_uart;
     //Config(logger *, dbObject *);
     int logLevel();
     int logLevel(int level);
@@ -37,7 +37,11 @@ public:
     void writeConfig();
     void writeState();
     QJsonObject *joConfig;
+    QJsonObject *joState;
     QSerialPort *serialPort;
+    QJsonObject uartResult;
+
+
 
 public slots:
 
@@ -47,8 +51,8 @@ public slots:
     //void write(const QJsonObject &json);
     void uartWrite(QByteArray data);
     void message(unsigned char, QString);
-signals:
-    void setState(QString msg);
+    void setState(QString, QJsonValue value);
+
 };
 
 #endif // CONFIG_H

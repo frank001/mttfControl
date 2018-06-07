@@ -1,6 +1,10 @@
 #ifndef MAIN_H
 #define MAIN_H
-#include <QtSql/QSqlQuery>
+
+enum eLevel {
+    ALL=0x00, INFO=0x01, WARN=0x02, ERROR=0x03, DEBUG=0x04, FATAL=0x05,
+    THREAD = 0x10, DATA=0x20, UART=0x30, CMD=0x40, NETWORK=0x50
+            };
 
 
 #endif // MAIN_H

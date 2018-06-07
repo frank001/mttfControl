@@ -7,14 +7,14 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDateTime>
-
-#include "dbobject.h"
+#include "main.h"
+#include "logger.h"
 
 
 Logger::Logger(QString name, QString password) {
     db = QSqlDatabase::addDatabase("QODBC3");
     db.setDatabaseName("DRIVER={SQL Server};Server=localhost\\SQLEXPRESS;Database=mttf;Uid="+name+";Pwd="+password+";");
-    this->message(0, "Logger start " + QDateTime::currentDateTime().toUTC().toString());
+    this->message(DATA|INFO, "Logger start " + QDateTime::currentDateTime().toUTC().toString());
 
 }
 
@@ -24,6 +24,9 @@ QJsonArray Logger::execute(QString sql) {
         query = new QSqlQuery;
         query->prepare(sql);
         if (!query->exec()) {   //an error occured      //TODO: review this!!!! NOT WORKING... or is it? when accessing from wrong thread it stops here...
+
+            //TODO: escape the sql text!!!!, can't use '' now.
+
             QSqlError err = db.lastError();
             ErrorText = err.text().replace("\\","\\\\");
             exit(EXIT_FAILURE);
@@ -56,10 +59,12 @@ void Logger::saveState(QString field, QJsonDocument jd) {
 }
 
 void Logger::message(unsigned char level, QString text) {
+    if ((level&m_Level)!=m_Level) return;
+
     QString now = "[" + QDateTime::currentDateTime().toLocalTime().toString("yyyyMMdd hh:mm:ss") +"]: " + text;
     QByteArray ba = now.toLatin1();
     const char *c_str = ba.data();
     qInfo() << c_str;
-    this->execute("insert into logControl (level, message) values (0,'" + now +"');");
+    this->execute("insert into logControl (level, message) values ("+QString::number(level)+" ,'" + now +"');");
 
 }

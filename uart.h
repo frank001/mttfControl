@@ -5,9 +5,8 @@
 #include <QtSerialPort/QSerialPort>
 #include <QThread>
 #include <QTextStream>
-#include <QTimer>
+//#include <QTimer>
 
-//#include "config.h"
 
 class uart : public QObject
 {
@@ -28,7 +27,7 @@ public:
 
 
 private:
-    //Config *cfg;
+
     QList<QSerialPortInfo> ports;
     QSerialPort *m_serialPort = nullptr;
 
@@ -36,7 +35,9 @@ private:
     QTextStream m_standardOutput;
 
     qint64 m_bytesWritten = 0;
-    QTimer m_timer;
+//    QTimer *m_timer;
+signals:
+    void message(unsigned char level, QString msg);
 
 };
 

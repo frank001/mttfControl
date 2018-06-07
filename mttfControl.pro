@@ -17,23 +17,23 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-    dbobject.cpp \
-    config.cpp \
     uart.cpp \
     tcpserver.cpp \
     tcpclient.cpp \
     tcptask.cpp \
-    commands.cpp
+    commands.cpp \
+    handler.cpp \
+    logger.cpp
 
 HEADERS += \
-    dbobject.h \
-    main.h \
-    config.h \
     uart.h \
     tcpserver.h \
     tcpclient.h \
     tcptask.h \
-    commands.h
+    commands.h \
+    handler.h \
+    logger.h \
+    main.h
 
 unix|win32: LIBS += -lQt5Sql
 

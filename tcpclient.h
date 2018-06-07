@@ -5,15 +5,15 @@
 #include <QTcpSocket>
 #include <QThreadPool>
 #include "tcpTask.h"
-#include "config.h"
-//#include "tcpserver.h"
+#include "handler.h"
+
 
 
 class tcpClient : public QObject
 {
     Q_OBJECT
 public:
-    explicit tcpClient(Config *, QObject *parent = nullptr);
+    explicit tcpClient(Handler *, QObject *parent = nullptr);
     //void setConfig(Config *);
     void setSocket(qintptr Descriptor);
 
@@ -28,7 +28,7 @@ public slots:
 
 private:
     QTcpSocket *socket;
-    Config *m_Config;
+    Handler *m_Handler;
     //QObject *Parent;
 };
 

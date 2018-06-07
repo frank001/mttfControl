@@ -2,42 +2,35 @@
 #include <QDebug>
 #include <QString>
 #include <QTextCodec>
-#include "config.h"
+#include "handler.h"
 #include <QJsonDocument>
+#include "main.h"
 #include "commands.h"
 
-tcpTask::tcpTask(Config *config, QByteArray data) :
+tcpTask::tcpTask(Handler *config, QByteArray data) :
     m_Config(config),
     Data(data)
 {
-    command = new Commands(m_Config);
-    connect(this, &tcpTask::message, m_Config, &Config::message);
-    m_Config->message(0, "tcpTask initialized.");
+    //command = new Commands(m_Config);
+    connect(this, &tcpTask::message, m_Config, &Handler::message);
+    m_Config->message(CMD|DEBUG, "tcpTask initialized.");
 }
 
 void tcpTask::run() {
-    // time consumer
-    Config *c = getConfig();
-    message(0, "Task started.");       //TODO: create SLOTS/SIGNALS between tasks and Handler. Done.
+
+    Handler *handler = getConfig();
+    command = new Commands(handler);
+
+    message(CMD|DEBUG, "Task started.");       //TODO: create SLOTS/SIGNALS between tasks and Handler. Done.
     QByteArray data = getData();
     QString msg = QString::fromUtf8(data.data());
+    message(NETWORK|INFO, "Request received: " + msg);
 
+    //QJsonDocument jdConfig(*command->Handle(msg));
+    //QByteArray ba = jdConfig.toJson();
 
-    command->Handle(msg);
-
-
-
-    //emit getState();
-
-    int iNumber = 0;
-    for(int i = 0; i < 100; i++) {
-        iNumber += 1;
-    }
-
-    message(0, "Task done");
-    QJsonDocument jdConfig(*c->joConfig);
-    QByteArray ba = jdConfig.toJson();
-
+    QByteArray ba = command->Handle(msg);
+    //message(0, "Task done");
 
     emit Result(ba);
 }
@@ -46,7 +39,7 @@ QByteArray tcpTask::getData(){
     return Data;
 }
 
-Config *tcpTask::getConfig(){
+Handler *tcpTask::getConfig(){
     return m_Config;
 }
 /*void tcpTask::getState() {
@@ -57,4 +50,5 @@ void tcpTask::setState(QString msg) {
     int i=0;
     i++;
 }
+
 
