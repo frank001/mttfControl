@@ -44,7 +44,7 @@ public slots:
     void getState();
     //void read(const QJsonObject &json);
     //void write(const QJsonObject &json);
-    void uartWrite();
+    void uartWrite(QByteArray data);
     void message(unsigned char, QString);
 signals:
     void setState(QString msg);

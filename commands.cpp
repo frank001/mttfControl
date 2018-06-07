@@ -23,10 +23,12 @@ void Commands::Handle(QString word){
     switch (MetaEnum.keysToValue(word.toLatin1())) {
     case getConfig:
         message(0, "Returning config: (TODO)");   //TODO
+
         i++;
         break;
     case setConfig:
         message(0, "Setting config: (TODO)");   //TODO
+        m_Config->uartWrite("l7\r");
         j++;
 
         break;
@@ -35,6 +37,12 @@ void Commands::Handle(QString word){
         break;
     case setState:
         message(0, "Setting state: (TODO)");   //TODO
+        break;
+    case setVibrateOn:
+        m_Config->uartWrite("h7\r");
+        break;
+    case setVibrateOff:
+        m_Config->uartWrite("l7\r");
         break;
     default:
         message(0, "Unknown command: " + word);

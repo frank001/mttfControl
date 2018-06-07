@@ -111,8 +111,8 @@ void Config::setState(QString msg) {
     int i=0;
     i++;
 }*/
-void Config::uartWrite() {
-
+void Config::uartWrite(QByteArray data) {
+    uart(this->serialPort).write(data);
 }
 void Config::message(unsigned char level, QString msg) {
     m_dbObject->message(level, msg);

@@ -14,7 +14,7 @@ class Commands : public QObject
 
 public:
     explicit Commands(Config *, QObject *parent = nullptr);
-    enum eCommands { getConfig, setConfig, getState, setState };
+    enum eCommands { getConfig, setConfig, getState, setState, setVibrateOn, setVibrateOff };
 
 
 private:
