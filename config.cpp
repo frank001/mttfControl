@@ -11,7 +11,8 @@ Config::Config(QSerialPort *port, Logger *database, QObject *parent) :
     QObject(parent),
     m_dbObject(database),
     m_SerialPort(port)
-{
+  {
+    //uart *m_uart = new uart(&m_SerialPort);
     //log = l;
     //db = database;
 
@@ -112,6 +113,7 @@ void Config::setState(QString msg) {
     i++;
 }*/
 void Config::uartWrite(QByteArray data) {
+    //m_uart->write(data);
     uart(this->serialPort).write(data);
 }
 void Config::message(unsigned char level, QString msg) {

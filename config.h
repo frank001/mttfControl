@@ -23,6 +23,7 @@ private:
     QJsonObject *joState;
     QSerialPort m_SerialPort;
 
+    //uart *m_uart;
 
 public:
     //explicit Config(QObject *parent = nullptr);

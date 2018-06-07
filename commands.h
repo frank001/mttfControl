@@ -20,6 +20,7 @@ public:
 private:
     Config *m_Config;
 
+
 signals:
     void message(unsigned char level, QString msg);
 
