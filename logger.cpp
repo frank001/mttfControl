@@ -15,21 +15,23 @@
 Logger::Logger(QString name, QString password, QObject *parent) : QObject(parent) {
     m_Database = QSqlDatabase::addDatabase("QODBC3");
     m_Database.setDatabaseName("DRIVER={SQL Server};Server=localhost\\SQLEXPRESS;Database=mttf;Uid="+name+";Pwd="+password+";");
-    this->message(this->DATA|this->INFO, "Logger start " + QDateTime::currentDateTime().toUTC().toString());
+    message(DATA|INFO, "Logger start " + QDateTime::currentDateTime().toUTC().toString());
 
 }
 
 QJsonArray Logger::execute(QString sql) {
     QJsonArray records;
+    QString msg = logRequired(DATA|DEBUG, "Executing query: " + sql);   //TODO: enable logging of queries, avoid loops. almost done. it logs to console only now.
     if (m_Database.open()) {
         query = new QSqlQuery;
         query->prepare(sql);
-        if (!query->exec()) {   //an error occured      //TODO: review this!!!! NOT WORKING... or is it? when accessing from wrong thread it stops here...
+        if (!query->exec()) {   //an error occured
 
             //TODO: escape the sql text!!!!, can't use '' now.
 
             QSqlError err = m_Database.lastError();
-            ErrorText = err.text().replace("\\","\\\\");
+            ErrorText = err.text().replace("\\","\\\\");                //TODO: get error text, this is not working
+            QString msg = logRequired(FATAL, "LOGGER: An error occured. Aborting application.");
             exit(EXIT_FAILURE);
 
         } else {    //process results
@@ -43,25 +45,29 @@ QJsonArray Logger::execute(QString sql) {
             }
             m_Database.close();
         }
-    } else {    //TODO: review this!!!! Done. Solved...
+    } else {
         QSqlError err = m_Database.lastError();
         ErrorText = err.text().replace("\\","\\\\");
-        qInfo() << ErrorText;
-        qInfo() << "FATAL ERROR. Aborting application.";
+        QString msg = logRequired(FATAL, "LOGGER: Aborting application. Error message:\n" + ErrorText);
         exit(EXIT_FAILURE);
 
+    }
+    if (records.count()>0) {    //TODO: improve this. create function to return log yes/no.
+                                //now this is executed for each query regardless of actual logging to console or database
+        QJsonDocument jd;
+
+        jd.setArray(records);
+        logRequired(DATA|DEBUG, "Data: " + QString(jd.toJson()));
     }
     return records;
 }
 
 void Logger::saveState(QString field, QJsonDocument jd) {
     execute("update currentState set "+field+" = '"+ jd.toJson() +"' where id=(select max(id) from currentState);");
-
 }
 
-void Logger::message(unsigned int level, QString text) {
+bool Logger::logRequired(unsigned int level, QString text) {
     QMetaObject MetaObject = this->staticMetaObject;
-    //QMetaEnum MetaEnum = QMetaEnum::fromType<eLevel>();
     QMetaEnum MetaEnum = MetaObject.enumerator(MetaObject.indexOfEnumerator("eLevel"));
 
     unsigned int cur_cat = (level &0xff00);
@@ -69,17 +75,26 @@ void Logger::message(unsigned int level, QString text) {
 
     unsigned int m_prio = m_Level & 0x00ff;
     unsigned int m_cat = m_Level & 0xff00;
+    QString msg;
 
-    if (((cur_cat)&m_cat) != cur_cat) return;   //discard unwanted categories
-    if (cur_prio <= m_prio  ) {                 //only include specified priorities
 
-        QString now = "[" + QDateTime::currentDateTime().toLocalTime().toString("yyyyMMdd hh:mm:ss") +"] "
-                + MetaEnum.valueToKey(cur_cat) + "|" + MetaEnum.valueToKey(cur_prio) + ": "
-                + text;
-        QByteArray ba = now.toLatin1();
+    if (((cur_cat)&m_cat) != cur_cat) return false;   //discard unwanted categories
+    if (cur_prio > m_prio  )  return false;
+    //{                 //only include specified priorities
+
+        msg = "[" + QDateTime::currentDateTime().toLocalTime().toString("yyyyMMdd hh:mm:ss") +"] "
+            + MetaEnum.valueToKey(cur_cat) + "|" + MetaEnum.valueToKey(cur_prio) + ": "
+            + text;
+        QByteArray ba = msg.toLatin1();
         const char *c_str = ba.data();
         qInfo() << c_str;
-        this->execute("insert into logControl (level, message) values ("+QString::number(level)+" ,'" + now +"');");
-    }
+
+    //}
+    return true;
+}
+
+void Logger::message(unsigned int level, QString text) {
+
+    if (logRequired(level, text)) execute("insert into logControl (level, message) values ("+QString::number(level)+" ,'" + text +"');");
 
 }

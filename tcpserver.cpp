@@ -20,7 +20,7 @@ tcpServer::tcpServer(Handler *config, QObject *parent) :
 
 void tcpServer::startServer() {
     if(listen(QHostAddress::Any, 1337)) {
-        message(NETWORK|INFO, "TCP Server: started");
+        message(NETWORK|WATCH, "TCP Server: started");
     } else {
         message(NETWORK|ERROR, "TCP Server: not started!");
     }

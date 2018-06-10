@@ -19,7 +19,7 @@ void tcpClient::setSocket(qintptr descriptor){
     connect(this, &tcpClient::message, m_Handler, &Handler::message);
 
     socket->setSocketDescriptor(descriptor);
-    message(NETWORK|INFO, "Client connected at port " + QString::number(descriptor));
+    message(NETWORK|WATCH, "Client connected at port " + QString::number(descriptor));
 }
 
 void tcpClient::connected() {   //async
@@ -28,7 +28,7 @@ void tcpClient::connected() {   //async
 }
 
 void tcpClient::disconnected() { //async
-    message(NETWORK|INFO, "Client disconnected");
+    message(NETWORK|WATCH, "Client disconnected");
 }
 
 void tcpClient::readyRead() {
@@ -48,7 +48,7 @@ void tcpClient::readyRead() {
 void tcpClient::taskResult(QString result) {
     QByteArray Buffer;
     Buffer.append(result);
-    message(NETWORK|INFO, "Result: " + result.replace("\n","") );
+    message(NETWORK|WATCH, "Result: " + result.replace("\n","") );
     socket->write(Buffer);
 }
 

@@ -17,7 +17,7 @@ Commands::Commands(Handler *config, QObject *parent) :
 
     connect(this, &Commands::message, m_Handler, &Handler::message);
     connect(this, &Commands::writeUart, m_Handler->m_uart, &uart::write);
-    message(COMMAND|INFO, "Commands initialized.");
+    message(COMMAND|WATCH, "Commands initialized.");
 }
 
 
@@ -52,10 +52,7 @@ QByteArray Commands::Handle(QString word){
     QMetaEnum MetaEnum = MetaObject.enumerator(MetaObject.indexOfEnumerator("eCommands"));
 
     QJsonObject request = joFromString(word);
-    //Writer.write("l7\r");
 
-    int i=0;
-    int j=0;
     QString name="Response";
     QJsonObject *joResponse = new QJsonObject();
     QString cmd = request.value("command").toString();
@@ -70,7 +67,6 @@ QByteArray Commands::Handle(QString word){
         break;
     case setConfig:
         message(COMMAND|WARN, "Setting config: (TODO)");
-        j++;
         break;
     case getState:
         message(COMMAND|DEBUG, "Returning state.");

@@ -30,7 +30,7 @@ signals:
 
 protected:
     void run();
-    Handler *m_Config;
+    Handler *m_Handler;
 
 };
 

@@ -27,10 +27,8 @@ private:
 
 
 public:
-    //explicit Config(QObject *parent = nullptr);
     explicit Handler(QObject *parent = nullptr);
     uart *m_uart;
-    //Config(logger *, dbObject *);
     int logLevel();
     int logLevel(int level);
     void setConfig(QJsonArray);

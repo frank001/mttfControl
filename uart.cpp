@@ -13,7 +13,7 @@ uart::uart(QSerialPort *port, QObject *parent) :
     m_serialPort(port)
 {
     connect(this, &uart::message, (Handler*)parent, &Handler::message);
-    message(UART|INFO, "initializing serial port");
+    message(UART|WATCH, "initializing serial port");
 
     m_timer = new QTimer();
     m_timer->setSingleShot(true);
