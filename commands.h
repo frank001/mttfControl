@@ -24,8 +24,9 @@ private:
 
 
 signals:
-    void message(unsigned char level, QString msg);
+    void message(unsigned int level, QString msg);
     void writeUart(const QByteArray &writeData);
+    uart *getUart();
 public slots:
     QByteArray Handle(QString);
 

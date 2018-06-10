@@ -12,14 +12,15 @@ uart::uart(QSerialPort *port, QObject *parent) :
     QObject(parent),
     m_serialPort(port)
 {
-    message(UART|DEBUG, "initializing serial port");
+    connect(this, &uart::message, (Handler*)parent, &Handler::message);
+    message(UART|INFO, "initializing serial port");
 
-    //m_timer = new QTimer();
-    //m_timer->setSingleShot(true);
+    m_timer = new QTimer();
+    m_timer->setSingleShot(true);
 
     connect(m_serialPort, &QSerialPort::bytesWritten, this, &uart::handleBytesWritten);
     connect(m_serialPort, &QSerialPort::errorOccurred, this, &uart::handleError);
-    //connect(m_timer, &QTimer::timeout, this, &uart::handleTimeout);
+    connect(m_timer, &QTimer::timeout, this, &uart::handleTimeout);
 
 
     /*  SerialPortInfo
@@ -79,5 +80,5 @@ void uart::write(const QByteArray &writeData) {
     } else if (bytesWritten != m_writeData.size()) {
         message(UART|ERROR, "Failed to write all the data to port");
     }
-    //m_timer->start(1000);
+    m_timer->start(5000);
 }

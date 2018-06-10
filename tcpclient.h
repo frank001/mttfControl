@@ -17,13 +17,15 @@ public:
     //void setConfig(Config *);
     void setSocket(qintptr Descriptor);
 
-signals:
 
 public slots:
     void connected();
     void disconnected();
     void readyRead();
     void taskResult(QString);
+
+signals:
+    void message(unsigned int level, QString message);
 
 
 private:

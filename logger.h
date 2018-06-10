@@ -5,23 +5,34 @@
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
 #include <QJsonArray>
+#include <QMetaEnum>
 #include "main.h"
 
-class Logger
+class Logger : public QObject
 {
+    Q_OBJECT
+    Q_ENUMS(eLevel)
+
 private:
-    QSqlDatabase db;
+    QSqlDatabase m_Database;
 
 
 public:
-    Logger(QString, QString);
-    unsigned char m_Level=ALL|ALL;
+    explicit Logger(QString, QString, QObject *parent = nullptr);
+    enum eLevel {       //TODO: figure out how to declare this only once (now in main.h and here)
+        FATAL = 0x00, ERROR=0x01, WARN=0x02, INFO=0x04, WATCH=0x08, DEBUG=0x10,
+        DATA=0x100, UART=0x200, COMMAND=0x400, NETWORK=0x800, ALL=0xff00
+    };
+
+
+    unsigned int m_Level=ALL|DEBUG;
     QString ErrorText;
-    QJsonArray execute(QString);
     QSqlQuery *query;
     void saveState(QString, QJsonDocument);
-    void message(unsigned char level, QString text);
 
+public slots:
+    QJsonArray execute(QString);
+    void message(unsigned int level, QString text);
 
 };
 

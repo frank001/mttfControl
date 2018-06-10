@@ -9,24 +9,30 @@ void tcpClient::setSocket(qintptr descriptor){
     socket = new QTcpSocket(this);
     //m_Config->message(0, "Socket created.");
 
-    connect(socket, SIGNAL(connected()), this, SLOT(connected()));
-    connect(socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
-    connect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
+    //connect(socket, SIGNAL(connected()), this, SLOT(connected()));
+    //connect(socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
+    //connect(socket, SIGNAL(readyRead()), this, SLOT(readyRead()));
+
+    connect(socket, &QTcpSocket::connected, this, &tcpClient::connected);
+    connect(socket, &QTcpSocket::disconnected, this, &tcpClient::disconnected);
+    connect(socket, &QTcpSocket::readyRead, this, &tcpClient::readyRead);
+    connect(this, &tcpClient::message, m_Handler, &Handler::message);
 
     socket->setSocketDescriptor(descriptor);
-    m_Handler->message(NETWORK|INFO, "Client connected at port " + QString::number(descriptor));
+    message(NETWORK|INFO, "Client connected at port " + QString::number(descriptor));
 }
 
 void tcpClient::connected() {   //async
-    m_Handler->message(NETWORK|DEBUG, "Client connected event");
+                                                                    //This function never gets called?
+    message(NETWORK|DEBUG, "Client connected event");
 }
 
 void tcpClient::disconnected() { //async
-    m_Handler->message(NETWORK|INFO, "Client disconnected");
+    message(NETWORK|INFO, "Client disconnected");
 }
 
 void tcpClient::readyRead() {
-    m_Handler->message(NETWORK|DEBUG, "Client data received.");
+    message(NETWORK|DEBUG, "Client data received.");
 
     QByteArray ba = socket->readAll();
     tcpTask *tcptask = new tcpTask(m_Handler, ba);
@@ -35,14 +41,14 @@ void tcpClient::readyRead() {
 
     connect(tcptask, SIGNAL(Result(QString)), this, SLOT(taskResult(QString)), Qt::QueuedConnection);
 
-    m_Handler->message(THREAD|DEBUG, "Spawning thread from QThreadPool");
+    message(NETWORK|DEBUG, "Spawning thread from QThreadPool");
     QThreadPool::globalInstance()->start(tcptask);
 
 }
 void tcpClient::taskResult(QString result) {
     QByteArray Buffer;
     Buffer.append(result);
-    m_Handler->message(NETWORK|INFO, "Result: " + result);
+    message(NETWORK|INFO, "Result: " + result.replace("\n","") );
     socket->write(Buffer);
 }
 

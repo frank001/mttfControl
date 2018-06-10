@@ -13,15 +13,14 @@ tcpTask::tcpTask(Handler *config, QByteArray data) :
 {
     //command = new Commands(m_Config);
     connect(this, &tcpTask::message, m_Config, &Handler::message);
-    m_Config->message(CMD|DEBUG, "tcpTask initialized.");
+    message(NETWORK|INFO, "tcpTask initialized.");
 }
 
 void tcpTask::run() {
-
     Handler *handler = getConfig();
     command = new Commands(handler);
 
-    message(CMD|DEBUG, "Task started.");       //TODO: create SLOTS/SIGNALS between tasks and Handler. Done.
+    message(NETWORK|DEBUG, "Task started.");       //TODO: create SLOTS/SIGNALS between tasks and Handler. Done.
     QByteArray data = getData();
     QString msg = QString::fromUtf8(data.data());
     message(NETWORK|INFO, "Request received: " + msg);

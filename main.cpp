@@ -12,20 +12,23 @@
 #include "main.h"
 
 
-Logger db("mttfControl", "topSecret");
+
 tcpServer *tcpserver;
-QSerialPort serialPort;
+
+//QSerialPort serialPort;
 
 
 
 int main(int argc, char *argv[]) {
     QCoreApplication a(argc, argv);
-    db.message(DATA|INFO, "Accessing database.");
 
-    Handler handler(&serialPort, &db);
-    handler.setConfig(db.execute("select top 1 * from currentState order by id desc;"));
 
-    tcpserver = new tcpServer(&handler);
+    //QSerialPort serialPort;
+
+    Handler *handler = new Handler(&a);
+
+
+    tcpserver = new tcpServer(handler);
     tcpserver->startServer();
 
 

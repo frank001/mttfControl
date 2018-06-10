@@ -5,7 +5,8 @@
 #include "logger.h"
 #include "uart.h"
 
-class Handler : public QObject {
+class Handler : public QObject
+{
      Q_OBJECT
 
 private:
@@ -21,13 +22,13 @@ private:
     Logger *m_dbObject;
 
 
-    QSerialPort m_SerialPort;
-
+    QSerialPort *m_SerialPort;
+    Logger *m_Logger;
 
 
 public:
     //explicit Config(QObject *parent = nullptr);
-    explicit Handler(QSerialPort *port, Logger *database, QObject *parent = nullptr);
+    explicit Handler(QObject *parent = nullptr);
     uart *m_uart;
     //Config(logger *, dbObject *);
     int logLevel();
@@ -38,7 +39,7 @@ public:
     void writeState();
     QJsonObject *joConfig;
     QJsonObject *joState;
-    QSerialPort *serialPort;
+
     QJsonObject uartResult;
 
 
@@ -50,8 +51,14 @@ public slots:
     //void read(const QJsonObject &json);
     //void write(const QJsonObject &json);
     void uartWrite(QByteArray data);
-    void message(unsigned char, QString);
+    void message(unsigned int, QString);
     void setState(QString, QJsonValue value);
+
+
+
+signals:
+    QJsonArray logExecute(QString);
+    void logMessage(unsigned int level, QString text);
 
 };
 

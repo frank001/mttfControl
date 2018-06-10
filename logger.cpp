@@ -7,27 +7,28 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDateTime>
+#include <QMetaEnum>
 #include "main.h"
 #include "logger.h"
 
 
-Logger::Logger(QString name, QString password) {
-    db = QSqlDatabase::addDatabase("QODBC3");
-    db.setDatabaseName("DRIVER={SQL Server};Server=localhost\\SQLEXPRESS;Database=mttf;Uid="+name+";Pwd="+password+";");
-    this->message(DATA|INFO, "Logger start " + QDateTime::currentDateTime().toUTC().toString());
+Logger::Logger(QString name, QString password, QObject *parent) : QObject(parent) {
+    m_Database = QSqlDatabase::addDatabase("QODBC3");
+    m_Database.setDatabaseName("DRIVER={SQL Server};Server=localhost\\SQLEXPRESS;Database=mttf;Uid="+name+";Pwd="+password+";");
+    this->message(this->DATA|this->INFO, "Logger start " + QDateTime::currentDateTime().toUTC().toString());
 
 }
 
 QJsonArray Logger::execute(QString sql) {
     QJsonArray records;
-    if (db.open()) {
+    if (m_Database.open()) {
         query = new QSqlQuery;
         query->prepare(sql);
         if (!query->exec()) {   //an error occured      //TODO: review this!!!! NOT WORKING... or is it? when accessing from wrong thread it stops here...
 
             //TODO: escape the sql text!!!!, can't use '' now.
 
-            QSqlError err = db.lastError();
+            QSqlError err = m_Database.lastError();
             ErrorText = err.text().replace("\\","\\\\");
             exit(EXIT_FAILURE);
 
@@ -40,10 +41,10 @@ QJsonArray Logger::execute(QString sql) {
                 }
                 records.push_back(record);
             }
-            db.close();
+            m_Database.close();
         }
     } else {    //TODO: review this!!!! Done. Solved...
-        QSqlError err = db.lastError();
+        QSqlError err = m_Database.lastError();
         ErrorText = err.text().replace("\\","\\\\");
         qInfo() << ErrorText;
         qInfo() << "FATAL ERROR. Aborting application.";
@@ -58,13 +59,27 @@ void Logger::saveState(QString field, QJsonDocument jd) {
 
 }
 
-void Logger::message(unsigned char level, QString text) {
-    if ((level&m_Level)!=m_Level) return;
+void Logger::message(unsigned int level, QString text) {
+    QMetaObject MetaObject = this->staticMetaObject;
+    //QMetaEnum MetaEnum = QMetaEnum::fromType<eLevel>();
+    QMetaEnum MetaEnum = MetaObject.enumerator(MetaObject.indexOfEnumerator("eLevel"));
 
-    QString now = "[" + QDateTime::currentDateTime().toLocalTime().toString("yyyyMMdd hh:mm:ss") +"]: " + text;
-    QByteArray ba = now.toLatin1();
-    const char *c_str = ba.data();
-    qInfo() << c_str;
-    this->execute("insert into logControl (level, message) values ("+QString::number(level)+" ,'" + now +"');");
+    unsigned int cur_cat = (level &0xff00);
+    unsigned int cur_prio = (level &0x00ff);
+
+    unsigned int m_prio = m_Level & 0x00ff;
+    unsigned int m_cat = m_Level & 0xff00;
+
+    if (((cur_cat)&m_cat) != cur_cat) return;   //discard unwanted categories
+    if (cur_prio <= m_prio  ) {                 //only include specified priorities
+
+        QString now = "[" + QDateTime::currentDateTime().toLocalTime().toString("yyyyMMdd hh:mm:ss") +"] "
+                + MetaEnum.valueToKey(cur_cat) + "|" + MetaEnum.valueToKey(cur_prio) + ": "
+                + text;
+        QByteArray ba = now.toLatin1();
+        const char *c_str = ba.data();
+        qInfo() << c_str;
+        this->execute("insert into logControl (level, message) values ("+QString::number(level)+" ,'" + now +"');");
+    }
 
 }

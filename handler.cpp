@@ -9,21 +9,42 @@
 #include "main.h"
 
 
-Handler::Handler(QSerialPort *port, Logger *database, QObject *parent) :
-    QObject(parent),
-    m_dbObject(database),
-    m_SerialPort(port)
+Handler::Handler(QObject *parent) : QObject(parent)
 {
-    m_SerialPort.setPortName("COM8");                   //TODO: move this after setConfig
-    m_SerialPort.setBaudRate(QSerialPort::Baud115200);
-    m_SerialPort.open(QIODevice::WriteOnly);
-    m_uart = new uart(&m_SerialPort);
+    m_Logger = new Logger("mttfControl", "topSecret", this);
+    connect(this, &Handler::logExecute, m_Logger, &Logger::execute);
+    connect(this, &Handler::logMessage, m_Logger, &Logger::message);
 
-    connect(m_uart, &uart::message, this, &Handler::message);
+    //Database initialization
+
+    /*
+    logMessage(DATA|DEBUG, "DEBUG: Accessing database.");
+    logMessage(DATA|WATCH, "WATCH: Accessing database.");
+    logMessage(DATA|INFO, "INFO: Accessing database.");
+    logMessage(DATA|WARN, "WARN: Accessing database.");
+    logMessage(DATA|ERROR, "ERROR: Accessing database.");
+    logMessage(DATA|FATAL, "FATAL: Accessing database.");
+    */
+
+    setConfig(logExecute("select top 1 * from currentState order by id desc;"));
+
+
+    //Serial port initialization
+    //TODO: implement synced communication (open/close port on each command?) on error stop MTTF run
+    m_SerialPort = new QSerialPort();
+    m_SerialPort->setPortName("COM8");
+    m_SerialPort->setBaudRate(QSerialPort::Baud115200);
+    m_SerialPort->open(QIODevice::WriteOnly);
+
+
+    m_uart = new uart(m_SerialPort, this);
+
+    //connect(m_uart, &uart::message, this, &Handler::message);
     //log = l;
     //db = database;
 
 }
+
 
 void Handler::setConfig(QJsonArray ja) {
     joConfig = new QJsonObject();
@@ -42,8 +63,8 @@ void Handler::setConfig(QJsonArray ja) {
 
 
 
-        m_dbObject->message(DATA|WARN,"Creating default state record.");
-        m_dbObject->execute("insert into currentState (config, state) values('','');");
+        logMessage(DATA|WARN,"Creating default state record.");
+        logExecute("insert into currentState (config, state) values('','');");
         writeConfig();
         writeState();
 
@@ -75,7 +96,7 @@ void Handler::setConfig(QJsonArray ja) {
         i++;
     }
 
-    m_dbObject->message(DATA|INFO,"Configuration complete.");
+    logMessage(DATA|INFO,"Configuration complete.");
 }
 
 void Handler::writeConfig() {
@@ -84,7 +105,7 @@ void Handler::writeConfig() {
 
     QJsonDocument jdConfig(*joConfig);
     m_dbObject->saveState("config", jdConfig);
-    m_dbObject->message(DATA|DEBUG, "Configuration saved: " +jdConfig.toJson());
+    logMessage(DATA|DEBUG, "Configuration saved: " +jdConfig.toJson());
 }
 
 void Handler::writeState() {
@@ -92,14 +113,14 @@ void Handler::writeState() {
 
     QJsonDocument jdState(*joState);
     m_dbObject->saveState("state", jdState);
-    m_dbObject->message(DATA|DEBUG, "State saved: "+ jdState.toJson());
+    logMessage(DATA|DEBUG, "State saved: "+ jdState.toJson());
 }
 
 
 int Handler::logLevel() { return mLogLevel; } //TODO: Review/remove this
 int Handler::logLevel(int level) {
     mLogLevel = level;
-    m_dbObject->message(DATA|INFO,"Log Level changed to: " + QString::number(level));
+    logMessage(DATA|INFO,"Log Level changed to: " + QString::number(level));
     return mLogLevel;
 }
 void Handler::setVibrate(int OnOff) {
@@ -128,6 +149,6 @@ void Handler::uartWrite(QByteArray data) {
     //m_uart->write(data);
     //uart(this->serialPort).write(data);
 }
-void Handler::message(unsigned char level, QString msg) {
-    m_dbObject->message(level, msg);
+void Handler::message(unsigned int level, QString msg) {
+    logMessage(level, msg);
 }

@@ -27,7 +27,7 @@ protected:
     void incomingConnection(qintptr socketDescriptor);
 
 signals:
-
+    void message(unsigned int level, QString message);
 public slots:
 
 
