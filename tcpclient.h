@@ -22,7 +22,7 @@ public slots:
     void connected();
     void disconnected();
     void readyRead();
-    void taskResult(QString);
+    void taskResult(QByteArray);
 
 signals:
     void message(unsigned int level, QString message);

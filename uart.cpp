@@ -9,18 +9,24 @@
 #include "main.h"
 
 uart::uart(QSerialPort *port, QObject *parent) :
-    QObject(parent),
-    m_serialPort(port)
+    QObject(parent)
 {
-    connect(this, &uart::message, (Handler*)parent, &Handler::message);
-    message(UART|WATCH, "initializing serial port");
+    //connect(this, &uart::message, (Handler*)parent, &Handler::message);
+
 
     m_timer = new QTimer();
     m_timer->setSingleShot(true);
 
-    connect(m_serialPort, &QSerialPort::bytesWritten, this, &uart::handleBytesWritten);
-    connect(m_serialPort, &QSerialPort::errorOccurred, this, &uart::handleError);
+
+    connect(&m_serialPort, &QSerialPort::bytesWritten, this, &uart::handleBytesWritten);
+    connect(&m_serialPort, &QSerialPort::errorOccurred, this, &uart::handleError);
     connect(m_timer, &QTimer::timeout, this, &uart::handleTimeout);
+
+    message(UART|INFO, "initializing serial port");
+    m_serialPort.setPortName("COM8");
+    m_serialPort.setBaudRate(QSerialPort::Baud115200);
+    m_serialPort.open(QIODevice::ReadWrite);
+
 
 
     /*  SerialPortInfo
@@ -36,8 +42,6 @@ uart::uart(QSerialPort *port, QObject *parent) :
     }
 
     QSerialPort(serialPort);
-
-
 
     serialPort.setPortName("COM3");
     serialPort.setBaudRate((qint32)9600);
@@ -70,10 +74,10 @@ void uart::handleError(QSerialPort::SerialPortError serialPortError) {
 }
 
 void uart::write(const QByteArray &writeData) {
-    m_writeData = writeData;
-    message(UART|DEBUG, "Writing data to uart: "+writeData);
-    const qint64 bytesWritten = m_serialPort->write(writeData);
-    m_serialPort->waitForBytesWritten(-1);
+    m_writeData = writeData + "\r\n";
+    //message(UART|DEBUG, "Writing data to uart: "+writeData);
+    const qint64 bytesWritten = m_serialPort.write(m_writeData);
+    m_serialPort.waitForBytesWritten(-1);
 
     if (bytesWritten == -1) {
         message(UART|ERROR, "Failed to write data to port.");

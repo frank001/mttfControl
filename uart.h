@@ -29,7 +29,7 @@ public:
 private:
 
     QList<QSerialPortInfo> ports;
-    QSerialPort *m_serialPort = nullptr;
+    QSerialPort m_serialPort;
 
     QByteArray m_writeData;
     QTextStream m_standardOutput;

@@ -24,7 +24,7 @@ public slots:
     void setState(QString msg);
 
 signals:
-    void Result(QString);
+    void Result(QByteArray);
     void getState();
     void message(qint16 level, QString msg);
 

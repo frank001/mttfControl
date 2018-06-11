@@ -1,6 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 #include <QJsonObject>
+#include <QJsonDocument>
 #include <QtSerialPort/QSerialPort>
 #include "logger.h"
 #include "uart.h"
@@ -24,7 +25,7 @@ private:
 
     QSerialPort *m_SerialPort;
     Logger *m_Logger;
-
+    QThread thread;
 
 public:
     explicit Handler(QObject *parent = nullptr);
@@ -35,10 +36,15 @@ public:
     void setVibrate(int);
     void writeConfig();
     void writeState();
+
+    QJsonDocument jdConfig;
+    QJsonDocument jdState;
+
     QJsonObject *joConfig;
     QJsonObject *joState;
 
     QJsonObject uartResult;
+
 
 
 

@@ -39,16 +39,17 @@ void tcpClient::readyRead() {
 
     tcptask->setAutoDelete(true);
 
-    connect(tcptask, SIGNAL(Result(QString)), this, SLOT(taskResult(QString)), Qt::QueuedConnection);
-
+    //connect(tcptask, SIGNAL(Result(QString)), this, SLOT(taskResult(QString)), Qt::QueuedConnection);
+    connect(tcptask, &tcpTask::Result, this, &tcpClient::taskResult, Qt::QueuedConnection);
     message(NETWORK|DEBUG, "Spawning thread from QThreadPool");
     QThreadPool::globalInstance()->start(tcptask);
 
 }
-void tcpClient::taskResult(QString result) {
-    QByteArray Buffer;
-    Buffer.append(result);
-    message(NETWORK|WATCH, "Result: " + result.replace("\n","") );
-    socket->write(Buffer);
+void tcpClient::taskResult(QByteArray result) {
+    //QByteArray Buffer;
+    //Buffer.append(result);
+    QString msg = result.replace("\n","");
+    message(NETWORK|WATCH, "Result: " + msg );
+    socket->write(result);
 }
 

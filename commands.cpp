@@ -1,14 +1,9 @@
-#include "commands.h"
-//#include <QMetaObject>
-
 #include <QMetaEnum>
 #include <QJsonDocument>
-//#include <QDebug>
+#include "commands.h"
 #include "handler.h"
 #include "uart.h"
 #include "main.h"
-
-
 
 Commands::Commands(Handler *config, QObject *parent) :
     QObject(parent),
@@ -53,8 +48,13 @@ QByteArray Commands::Handle(QString word){
 
     QJsonObject request = joFromString(word);
 
-    QString name="Response";
-    QJsonObject *joResponse = new QJsonObject();
+    QString name="TODO";
+
+    QJsonDocument jdResponse;
+
+
+
+
     QString cmd = request.value("command").toString();
     message(COMMAND|DEBUG, "Command received: " + cmd);
     QString value = request.value("value").toString();
@@ -62,45 +62,48 @@ QByteArray Commands::Handle(QString word){
     switch (MetaEnum.keysToValue(cmd.toLatin1())) {
     case getConfig:
         message(COMMAND|DEBUG, "Returning config.");
-        joResponse = m_Handler->joConfig;
-        name="config";
+        jdResponse = m_Handler->jdConfig;
         break;
     case setConfig:
         message(COMMAND|WARN, "Setting config: (TODO)");
         break;
     case getState:
         message(COMMAND|DEBUG, "Returning state.");
-        joResponse = m_Handler->joState;
-        name="state";
+        jdResponse = m_Handler->jdState;
         break;
     case setState:
         message(COMMAND|WARN, "Setting state: (TODO)");
         break;
     case setVibrate:
         message(COMMAND|DEBUG, "Vibrate: " + value);
-        value=="0"?writeUart("l7\r"):writeUart("h7\r");
+        value=="0"?writeUart("l7"):writeUart("h7");
         m_Handler->setState("vibrate", value);
-        joResponse = m_Handler->joState;
-        name="state";
+        jdResponse = m_Handler->jdState;
         break;
     case setTubes:
         message(COMMAND|DEBUG, "Tubes: " + value);
-        value=="0"?writeUart("l4\r"):writeUart("h4\r");
+        value=="0"?writeUart("l4"):writeUart("h4");
         m_Handler->setState("tubes", value);
-        joResponse = m_Handler->joState;
-        name="state";
+        jdResponse = m_Handler->jdState;
         break;
     default:
         message(NETWORK|COMMAND|ERROR, "Unknown command: " + word);
-        joResponse->insert("unknown command", word);
+        QJsonObject error;
+        error.insert("command", QJsonValue::fromVariant(cmd));
+        error.insert("message", QJsonValue::fromVariant("unknown command."));
+
+        QJsonObject joResponse;
+        joResponse.insert("error" , error);
+
+        QJsonDocument jdError(joResponse);
+        jdResponse = jdError;
+
         break;
 
     }
+    QString test = jdResponse.toJson();
 
-    QJsonDocument jdConfig(*joResponse);
-    QString response = "{ \"" + name + "\": "+ jdConfig.toJson() + " };";
-    QByteArray ba = response.toLatin1();
-    return ba;
+    return jdResponse.toBinaryData();
 
 
 }

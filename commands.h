@@ -17,8 +17,6 @@ public:
     explicit Commands(Handler *, QObject *parent = nullptr);
     enum eCommands { getConfig, setConfig, getState, setState, setVibrate, setTubes };
 
-    QJsonObject *m_Response;
-
 private:
     Handler *m_Handler;
 
