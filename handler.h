@@ -50,20 +50,22 @@ public:
 
 public slots:
 
-    QJsonObject *getConfig();
+    //QJsonObject *getConfig();
     void getState();
+    void getConfig();
     //void read(const QJsonObject &json);
     //void write(const QJsonObject &json);
     void uartWrite(QByteArray data);
     void message(unsigned int, QString);
     void setState(QString, QJsonValue value);
-
-
+    void setConfig(QString, QJsonValue value);
+    void doorChange(int status);
 
 signals:
     QJsonArray logExecute(QString);
     void logMessage(unsigned int level, QString text);
-
+    void StateChanged(QJsonDocument);
+    void ConfigChanged(QJsonDocument);
 };
 
 #endif // CONFIG_H

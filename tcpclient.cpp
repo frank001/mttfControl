@@ -16,7 +16,12 @@ void tcpClient::setSocket(qintptr descriptor){
     connect(socket, &QTcpSocket::connected, this, &tcpClient::connected);
     connect(socket, &QTcpSocket::disconnected, this, &tcpClient::disconnected);
     connect(socket, &QTcpSocket::readyRead, this, &tcpClient::readyRead);
+
+    connect(m_Handler, &Handler::StateChanged, this, &tcpClient::stateChanged);
+    connect(m_Handler, &Handler::ConfigChanged, this, &tcpClient::configChanged);
     connect(this, &tcpClient::message, m_Handler, &Handler::message);
+
+
 
     socket->setSocketDescriptor(descriptor);
     message(NETWORK|WATCH, "Client connected at port " + QString::number(descriptor));
@@ -51,5 +56,11 @@ void tcpClient::taskResult(QByteArray result) {
     QString msg = result.replace("\n","");
     message(NETWORK|WATCH, "Result: " + msg );
     socket->write(result);
+}
+void tcpClient::stateChanged(QJsonDocument jd) {
+    socket->write(jd.toBinaryData());
+}
+void tcpClient::configChanged(QJsonDocument jd) {
+    socket->write(jd.toBinaryData());
 }
 

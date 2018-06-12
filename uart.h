@@ -18,7 +18,7 @@ private slots:
     void handleBytesWritten(qint64 bytes);
     void handleTimeout();
     void handleError(QSerialPort::SerialPortError error);
-
+    void handleReadyRead();
 
 
 public:
@@ -38,7 +38,7 @@ private:
     QTimer *m_timer;
 signals:
     void message(qint16 level, QString msg);
-
+    void doorChange(int status);
 };
 
 #endif // UART_H

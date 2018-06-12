@@ -41,6 +41,7 @@ Handler::Handler(QObject *parent) : QObject(parent)
 
     m_uart = new uart(nullptr, &thread);
     connect(m_uart, &uart::message, this, &Handler::message);
+    connect(m_uart, &uart::doorChange, this, &Handler::doorChange);
     thread.start();
 
 
@@ -67,6 +68,7 @@ void Handler::setConfig(QJsonArray ja) {
         s.insert("01mlux", QJsonValue::fromVariant(0));
         s.insert("5mlux", QJsonValue::fromVariant(0));
         s.insert("50lux", QJsonValue::fromVariant(0));
+        s.insert("door", QJsonValue::fromVariant(0));
     QJsonObject state;
     state.insert("state" , s);
     QJsonDocument jds(state);
@@ -171,22 +173,35 @@ void Handler::setVibrate(int OnOff) {
     writeState();
 }
 
-QJsonObject *Handler::getConfig(){
-
-    //QJsonDocument jdConfig(cfg);
-    //return jdConfig.toJson();
-    return joConfig;
+void Handler::getConfig(){
+    emit ConfigChanged(jdConfig);
 }
 void Handler::getState() {
-
-    //emit(setState("State object"));
+    emit StateChanged(jdState);
 }
 
 void Handler::setState(QString key, QJsonValue value) {
-    //this->joState->value(key) = value;
-    //joState->remove(key);
-    //joState->insert(key, value);
-    //TODO: implement slots and signals
+    QJsonObject joState = jdState.object();
+    QJsonValue jvState = joState.value("state");
+    QJsonObject joValues = jvState.toObject();
+
+    joValues.remove(key);
+    joValues.insert(key, value);
+
+
+    QJsonObject state;
+    state.insert("state" , joValues);
+    QJsonDocument jds(state);
+    QString test = jds.toJson();
+    jdState = jds;
+    jdState.fromJson(jds.toJson());
+    int j=0;
+    //emit StateChanged(jdState);
+
+}
+
+void Handler::setConfig(QString, QJsonValue value) {
+
 }
 
 void Handler::uartWrite(QByteArray data) {
@@ -197,4 +212,8 @@ void Handler::message(unsigned int level, QString msg) {
     QString config = jdConfig.toJson();
     QString state = jdState.toJson();
     logMessage(level, msg);
+}
+void Handler::doorChange(int status){
+    setState("door", status);
+    emit StateChanged(jdState);
 }
