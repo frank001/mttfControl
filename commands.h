@@ -15,11 +15,11 @@ class Commands : public QObject
 
 public:
     explicit Commands(Handler *, QObject *parent = nullptr);
-    enum eCommands { getConfig, setConfig, getState, setState, setVibrate, setTubes, set01mlux, set5mlux, set50lux, setLights, getStatus };
+    enum eCommands { getConfig, setConfig, getState, setState, setVibrate, setTubes, setLight, getStatus };
+    enum eLightLevel { llOff, ll01mlux, ll5mlux, ll50lux };
 
 private:
     Handler *m_Handler;
-    void setLightOff();
 
 
 signals:

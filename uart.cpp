@@ -26,8 +26,8 @@ uart::uart(QSerialPort *port, QObject *parent) :
     connect(m_timer, &QTimer::timeout, this, &uart::handleTimeout);
 
     message(UART|INFO, "initializing serial port");
-    m_serialPort.setPortName("COM1");
-    m_serialPort.setBaudRate(QSerialPort::Baud9600);
+    m_serialPort.setPortName("COM8");
+    m_serialPort.setBaudRate(QSerialPort::Baud115200);
     m_serialPort.open(QIODevice::ReadWrite);
 
     m_timer->start(100);
@@ -100,14 +100,16 @@ void uart::handleReadyRead() {
         data.append(m_serialPort.readAll());
     }
     if (data.length()>0) {
-        message(UART|WATCH, "Serial port data received: " +  QTextCodec::codecForMib(106)->toUnicode(data));
+        QString sdata = QTextCodec::codecForMib(106)->toUnicode(data);
+        message(UART|WATCH, "Serial port data received: " +  sdata);
         if (data=="reset@disabled.@") { //door open
             doorChange(1);
             message(UART|WARN, "Door open.");
-        }
-        if (data=="active.@") { //door closed
+        } else if (data=="active.@") { //door closed
             doorChange(0);
             message(UART|WARN, "Door closed.");
+        } else if (data!="@.") {   //unknown data received
+            message(UART|ERROR, "Unkown data received: " + sdata);
         }
 
     }

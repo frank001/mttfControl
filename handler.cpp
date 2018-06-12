@@ -65,9 +65,7 @@ void Handler::setConfig(QJsonArray ja) {
     QJsonObject s;
         s.insert("vibrate", QJsonValue::fromVariant(0));
         s.insert("tubes", QJsonValue::fromVariant(0));
-        s.insert("01mlux", QJsonValue::fromVariant(0));
-        s.insert("5mlux", QJsonValue::fromVariant(0));
-        s.insert("50lux", QJsonValue::fromVariant(0));
+        s.insert("light", QJsonValue::fromVariant(0));
         s.insert("door", QJsonValue::fromVariant(0));
     QJsonObject state;
     state.insert("state" , s);
@@ -141,7 +139,7 @@ void Handler::setConfig(QJsonArray ja) {
         i++;
     }
 
-    logMessage(DATA|INFO,"Configuration complete.");
+    logMessage(DATA|WATCH,"Configuration complete.");
 }
 
 void Handler::writeConfig() {
@@ -180,8 +178,25 @@ void Handler::getState() {
     emit StateChanged(jdState);
 }
 
-void Handler::setState(QString key, QJsonValue value) {
+QJsonDocument Handler::jdUpdate(QJsonDocument jd, QString name, QString key, QJsonValue value) {
     QJsonObject joState = jdState.object();
+    QJsonValue jvState = joState.value(name);
+    QJsonObject joValues = jvState.toObject();
+
+
+    joValues.remove(key);
+    joValues.insert(key, value);
+
+    QJsonObject state;
+    state.insert(name , joValues);
+    QJsonDocument jds(state);
+    //QString test = jds.toJson();
+
+    return jds;
+}
+
+void Handler::setState(QString key, QJsonValue value) {
+    /*QJsonObject joState = jdState.object();
     QJsonValue jvState = joState.value("state");
     QJsonObject joValues = jvState.toObject();
 
@@ -196,8 +211,10 @@ void Handler::setState(QString key, QJsonValue value) {
     jdState = jds;
     jdState.fromJson(jds.toJson());
     int j=0;
-    //emit StateChanged(jdState);
 
+    */
+    jdState = jdUpdate(jdState, "state", key, value);
+    emit StateChanged(jdState);
 }
 
 void Handler::setConfig(QString, QJsonValue value) {
@@ -209,11 +226,12 @@ void Handler::uartWrite(QByteArray data) {
     //uart(this->serialPort).write(data);
 }
 void Handler::message(unsigned int level, QString msg) {
-    QString config = jdConfig.toJson();
-    QString state = jdState.toJson();
     logMessage(level, msg);
 }
 void Handler::doorChange(int status){
     setState("door", status);
     emit StateChanged(jdState);
+}
+void Handler::lightChange(int level) {
+
 }

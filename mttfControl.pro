@@ -23,7 +23,8 @@ SOURCES += \
     tcptask.cpp \
     commands.cpp \
     handler.cpp \
-    logger.cpp
+    logger.cpp \
+    cycle.cpp
 
 HEADERS += \
     uart.h \
@@ -33,7 +34,8 @@ HEADERS += \
     commands.h \
     handler.h \
     logger.h \
-    main.h
+    main.h \
+    cycle.h
 
 unix|win32: LIBS += -lQt5Sql
 

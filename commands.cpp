@@ -15,8 +15,6 @@ Commands::Commands(Handler *config, QObject *parent) :
 
     connect(this, &Commands::setHandlerState, m_Handler, &Handler::setState);
 
-    //connect(this, &Commands::setHandlerConfig, m_Handler, &Handler::setConfig);
-
     message(COMMAND|WATCH, "Commands initialized.");
 }
 
@@ -45,10 +43,6 @@ QJsonObject joFromString(const QString& in) {
         return obj;
 }
 
-void Commands::setLightOff() {
-    writeUart("l1");
-    //QThread::currentThread()->sleep(10);
-}
 
 QByteArray Commands::Handle(QString word){
 
@@ -71,7 +65,6 @@ QByteArray Commands::Handle(QString word){
     switch (MetaEnum.keysToValue(cmd.toLatin1())) {
     case getConfig:
         message(COMMAND|DEBUG, "Returning config.");
-        //jdResponse = m_Handler->jdConfig;
         m_Handler->getConfig();
 
         break;
@@ -81,68 +74,45 @@ QByteArray Commands::Handle(QString word){
     case getState:
         message(COMMAND|DEBUG, "Returning state.");
         m_Handler->getState();
-        //jdResponse = m_Handler->jdState;
         break;
     case setState:
-        message(COMMAND|WARN, "Setting state: (TODO)");
+        message(COMMAND|WARN, "Setting state: (TODO)"); //is this really needed here? state is set by commands
         break;
     case setVibrate:
         message(COMMAND|DEBUG, "Vibrate: " + value);
         value=="0"?writeUart("l7"):writeUart("h7");
-        m_Handler->setState("vibrate", value);
-        m_Handler->getState();
-        //jdResponse = m_Handler->jdState;
+        m_Handler->setState("vibrate", value.toInt());
         break;
     case setTubes:
         message(COMMAND|DEBUG, "Tubes: " + value);
         value=="0"?writeUart("l4"):writeUart("h4");
-        m_Handler->setState("tubes", value);
-        m_Handler->getState();
-        //jdResponse = m_Handler->jdState;
+        m_Handler->setState("tubes", value.toInt());
         break;
-    case set01mlux:
-
-        writeUart("l1"); //setLightOff();
-        writeUart("h6");
-        writeUart("h5");
-        writeUart("h1");
-        QThread::currentThread()->sleep(10);
-        m_Handler->setState("01mlux",1);
-        m_Handler->setState("5mlux",0);
-        m_Handler->setState("50lux",0);
-        m_Handler->getState();
-        break;
-    case set5mlux:
-
-        writeUart("l1"); //setLightOff();
-        writeUart("l6");
-        writeUart("h5");
-        writeUart("h1");
-        QThread::currentThread()->sleep(10);
-        m_Handler->setState("01mlux",0);
-        m_Handler->setState("5mlux",1);
-        m_Handler->setState("50lux",0);
-        m_Handler->getState();
-        break;
-    case set50lux:
-        //setLightOff();
-        writeUart("l6");
-        writeUart("l5");
-        writeUart("h1");
-        QThread::currentThread()->sleep(10);
-        m_Handler->setState("01mlux",0);
-        m_Handler->setState("5mlux",0);
-        m_Handler->setState("50lux",1);
-        m_Handler->getState();
-        break;
-    case setLights:
-        writeUart("l1");
-        QThread::currentThread()->sleep(10);
-        m_Handler->setState("01mlux",0);
-        m_Handler->setState("5mlux",0);
-        m_Handler->setState("50lux",0);
-        m_Handler->getState();
-        //setLightOff();
+    case setLight:
+        message(COMMAND|DEBUG, "Vibrate: " + value);
+        m_Handler->setState("light", value.toInt());
+        switch (value.toInt()) {
+        case (llOff):
+            writeUart("l1");    //lights off
+            break;
+        case (ll01mlux):
+            writeUart("l1");
+            writeUart("h6");
+            writeUart("h5");
+            writeUart("h1");
+            break;
+        case (ll5mlux):
+            writeUart("l1");
+            writeUart("l6");
+            writeUart("h5");
+            writeUart("h1");
+            break;
+        case (ll50lux):
+            writeUart("l6");
+            writeUart("l5");
+            writeUart("h1");
+            break;
+        }
         break;
     case getStatus:
         writeUart("all");

@@ -25,7 +25,7 @@ public:
     };
 
 
-    unsigned int m_Level=ALL|WATCH; //ALL|INFO; //(ALL&~DATA)|DEBUG;
+    unsigned int m_Level=ALL|INFO; //ALL|INFO; //(ALL&~DATA)|DEBUG;
     QString ErrorText;
     QSqlQuery *query;
     void saveState(QString, QJsonDocument);

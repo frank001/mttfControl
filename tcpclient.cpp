@@ -28,7 +28,7 @@ void tcpClient::setSocket(qintptr descriptor){
 }
 
 void tcpClient::connected() {   //async
-                                                                    //This function never gets called?
+                                                                    //This function never gets called? it did once...
     message(NETWORK|DEBUG, "Client connected event");
 }
 

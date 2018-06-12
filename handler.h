@@ -27,6 +27,8 @@ private:
     Logger *m_Logger;
     QThread thread;
 
+    QJsonDocument jdUpdate(QJsonDocument, QString, QString, QJsonValue);
+
 public:
     explicit Handler(QObject *parent = nullptr);
     uart *m_uart;
@@ -60,6 +62,7 @@ public slots:
     void setState(QString, QJsonValue value);
     void setConfig(QString, QJsonValue value);
     void doorChange(int status);
+    void lightChange(int level); //0 - off, 1 -  0.1mlux, 2 - 5mlux, 3 - 50lux
 
 signals:
     QJsonArray logExecute(QString);
