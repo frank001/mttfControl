@@ -18,8 +18,8 @@ tcpTask::tcpTask(Handler *handler, QByteArray data) :
 
 void tcpTask::run() {
     Handler *handler = getConfig();
-    command = new Commands(m_Handler);
-
+    //command = new Commands(m_Handler);
+    command = m_Handler->m_Command;
     message(NETWORK|DEBUG, "Task started.");       //TODO: create SLOTS/SIGNALS between tasks and Handler. Done.
     QByteArray data = getData();
     QString msg = QString::fromUtf8(data.data());

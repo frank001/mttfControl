@@ -26,8 +26,8 @@ uart::uart(QSerialPort *port, QObject *parent) :
     connect(m_timer, &QTimer::timeout, this, &uart::handleTimeout);
 
     message(UART|INFO, "initializing serial port");
-    m_serialPort.setPortName("COM1");
-    m_serialPort.setBaudRate(QSerialPort::Baud9600);
+    m_serialPort.setPortName("COM8");
+    m_serialPort.setBaudRate(QSerialPort::Baud115200);
     m_serialPort.open(QIODevice::ReadWrite);
 
     m_timer->start(100);
@@ -80,7 +80,7 @@ void uart::handleError(QSerialPort::SerialPortError serialPortError) {
 
 void uart::write(const QByteArray &writeData) {
     m_writeData = writeData + "\r";
-    //message(UART|DEBUG, "Writing data to uart: "+writeData);
+    message(UART|WATCH, "Writing data to uart: "+writeData);
     const qint64 bytesWritten = m_serialPort.write(m_writeData);
     m_serialPort.waitForBytesWritten(-1);
 
@@ -93,7 +93,10 @@ void uart::write(const QByteArray &writeData) {
 }
 
 void uart::handleReadyRead() {
-    if (!m_serialPort.isOpen()) return;
+    if (!m_serialPort.isOpen()) {
+        message(UART|ERROR, "Port is closed!");
+        return;
+    }
     //message(UART|DEBUG, "handleReadyRead invoked");
     QByteArray data = m_serialPort.readAll();
     while (m_serialPort.waitForReadyRead(50)) {

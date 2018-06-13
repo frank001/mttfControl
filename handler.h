@@ -5,7 +5,8 @@
 #include <QtSerialPort/QSerialPort>
 #include "logger.h"
 #include "uart.h"
-//#include "cycle.h"
+#include "cycle.h"
+#include "commands.h"
 
 class Handler : public QObject
 {
@@ -26,7 +27,8 @@ private:
 
     QSerialPort *m_SerialPort;
     Logger *m_Logger;
-    //Cycle *m_Cycle;
+
+    Cycle *m_Cycle;
 
     QThread thread;
 
@@ -35,6 +37,8 @@ private:
 public:
     explicit Handler(QObject *parent = nullptr);
     uart *m_uart;
+    Commands *m_Command;
+
     int logLevel();
     int logLevel(int level);
     void setConfig(QJsonArray);
@@ -66,12 +70,14 @@ public slots:
     void setConfig(QString, QJsonValue value);
     void doorChange(int status);
     void lightChange(int level); //0 - off, 1 -  0.1mlux, 2 - 5mlux, 3 - 50lux
+    void setHandlerCycle(int);
 
 signals:
     QJsonArray logExecute(QString);
     void logMessage(unsigned int level, QString text);
     void StateChanged(QJsonDocument);
     void ConfigChanged(QJsonDocument);
+    //void startCycle(int);
 };
 
 #endif // CONFIG_H

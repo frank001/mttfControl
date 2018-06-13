@@ -44,6 +44,11 @@ Handler::Handler(QObject *parent) : QObject(parent)
     connect(m_uart, &uart::doorChange, this, &Handler::doorChange);
     thread.start();
 
+    m_Command = new Commands(this);
+
+    m_Cycle = new Cycle(this);
+
+
     //m_cycle = new Cycle(m_uart, this);
     //connect(m_uart, &uart::message, this, &Handler::message);
     //log = l;
@@ -233,5 +238,9 @@ void Handler::doorChange(int status){
     emit StateChanged(jdState);
 }
 void Handler::lightChange(int level) {
+
+}
+void Handler::setHandlerCycle(int level) {
+    m_Cycle->start();
 
 }

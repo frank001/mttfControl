@@ -1,21 +1,29 @@
 #include <QMetaEnum>
 #include <QJsonDocument>
+
 #include "commands.h"
 #include "handler.h"
 #include "uart.h"
 #include "main.h"
 
-Commands::Commands(Handler *config, QObject *parent) :
-    QObject(parent),
-    m_Handler(config)
+
+Commands::Commands(QObject *parent) :
+    QObject(parent)
+
 {
 
-    connect(this, &Commands::message, m_Handler, &Handler::message);
-    connect(this, &Commands::writeUart, m_Handler->m_uart, &uart::write);
 
-    connect(this, &Commands::setHandlerState, m_Handler, &Handler::setState);
+    connect(this, &Commands::message, (Handler*)parent, &Handler::message);
+    connect(this, &Commands::writeUart, ((Handler*)parent)->m_uart, &uart::write);
+    connect(this, &Commands::setHandlerState, (Handler*)parent, &Handler::setState);
+    connect(this, &Commands::setHandlerCycle, (Handler*)parent, &Handler::setHandlerCycle);
 
     message(COMMAND|WATCH, "Commands initialized.");
+
+
+
+    //connect(m_Handler, &Handler::startCycle, m_cycle, &Cycle::start);
+
 }
 
 
@@ -43,37 +51,30 @@ QJsonObject joFromString(const QString& in) {
         return obj;
 }
 
-
-QByteArray Commands::Handle(QString word){
-
+QByteArray Commands::HandleRaw(QString cmd, QString value){
     QMetaObject MetaObject = this->staticMetaObject;
-    QMetaEnum MetaEnum = MetaObject.enumerator(MetaObject.indexOfEnumerator("eCommands"));
+    MetaEnum = MetaObject.enumerator(MetaObject.indexOfEnumerator("eCommands"));
 
-    QJsonObject request = joFromString(word);
+    message(COMMAND|DEBUG, "Command received: " + cmd + ": " + value);
 
     QString name="TODO";
-
     QJsonDocument jdResponse;
 
-
-
-
-    QString cmd = request.value("command").toString();
-    message(COMMAND|DEBUG, "Command received: " + cmd);
-    QString value = request.value("value").toString();
     QString msg;
-    switch (MetaEnum.keysToValue(cmd.toLatin1())) {
+    int command =MetaEnum.keysToValue(cmd.toLatin1());
+    switch (command) {
     case getConfig:
         message(COMMAND|DEBUG, "Returning config.");
-        m_Handler->getConfig();
-
+        //m_Handler->getConfig();
+        //((Handler*)parent)->getConfig();
         break;
     case setConfig:
         message(COMMAND|WARN, "Setting config: (TODO)");
         break;
     case getState:
         message(COMMAND|DEBUG, "Returning state.");
-        m_Handler->getState();
+        //((Handler*)parent)->getState();
+        //m_Handler->getState();
         break;
     case setState:
         message(COMMAND|WARN, "Setting state: (TODO)"); //is this really needed here? state is set by commands
@@ -81,16 +82,19 @@ QByteArray Commands::Handle(QString word){
     case setVibrate:
         message(COMMAND|DEBUG, "Vibrate: " + value);
         value=="0"?writeUart("l7"):writeUart("h7");
-        m_Handler->setState("vibrate", value.toInt());
+        //m_Handler->setState("vibrate", value.toInt());
+        setHandlerState("vibrate", value.toInt());
         break;
     case setTubes:
         message(COMMAND|DEBUG, "Tubes: " + value);
         value=="0"?writeUart("l4"):writeUart("h4");
-        m_Handler->setState("tubes", value.toInt());
+        setHandlerState("tubes", value.toInt());
+        //m_Handler->setState("tubes", value.toInt());
         break;
     case setLight:
-        message(COMMAND|DEBUG, "Vibrate: " + value);
-        m_Handler->setState("light", value.toInt());
+        message(COMMAND|DEBUG, "Light: " + value);
+
+        //m_Handler->setState("light", value.toInt());
         switch (value.toInt()) {
         case (llOff):
             writeUart("l1");    //lights off
@@ -113,14 +117,21 @@ QByteArray Commands::Handle(QString word){
             writeUart("h1");
             break;
         }
+        setHandlerState("light", value.toInt());
         break;
     case getStatus:
         writeUart("all");
         break;
+    case setCycle:
+        message(COMMAND|INFO, "Cycle: " + value);
+        setHandlerCycle(value.toInt());
+        //m_cycle->start();       //TODO.
+        break;
+
     default:
-        message(NETWORK|COMMAND|ERROR, "Unknown command: " + word);
+        message(COMMAND|ERROR, "Unknown command: " + cmd +": " + value);
         QJsonObject error;
-        error.insert("command", QJsonValue::fromVariant(cmd));
+        error.insert("command", QJsonValue::fromVariant(cmd +": " + value));
         error.insert("message", QJsonValue::fromVariant("unknown command."));
 
         QJsonObject joResponse;
@@ -136,5 +147,22 @@ QByteArray Commands::Handle(QString word){
 
     return jdResponse.toBinaryData();
 
-
 }
+
+QByteArray Commands::Handle(QString word){
+
+    //QMetaObject MetaObject = this->staticMetaObject;
+    //MetaEnum = MetaObject.enumerator(MetaObject.indexOfEnumerator("eCommands"));
+
+    QJsonObject request = joFromString(word);
+
+
+
+
+
+
+    QString cmd = request.value("command").toString();
+    QString value = request.value("value").toString();
+    return HandleRaw(cmd, value);
+}
+
