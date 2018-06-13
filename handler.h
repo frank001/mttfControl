@@ -5,6 +5,7 @@
 #include <QtSerialPort/QSerialPort>
 #include "logger.h"
 #include "uart.h"
+//#include "cycle.h"
 
 class Handler : public QObject
 {
@@ -25,6 +26,8 @@ private:
 
     QSerialPort *m_SerialPort;
     Logger *m_Logger;
+    //Cycle *m_Cycle;
+
     QThread thread;
 
     QJsonDocument jdUpdate(QJsonDocument, QString, QString, QJsonValue);

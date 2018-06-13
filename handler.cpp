@@ -9,7 +9,7 @@
 #include "logger.h"
 #include "uart.h"
 #include "main.h"
-
+#include "cycle.h"
 
 Handler::Handler(QObject *parent) : QObject(parent)
 {
@@ -44,7 +44,7 @@ Handler::Handler(QObject *parent) : QObject(parent)
     connect(m_uart, &uart::doorChange, this, &Handler::doorChange);
     thread.start();
 
-
+    //m_cycle = new Cycle(m_uart, this);
     //connect(m_uart, &uart::message, this, &Handler::message);
     //log = l;
     //db = database;
