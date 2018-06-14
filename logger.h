@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QtSql/QSqlDatabase>
 #include <QtSql/QSqlQuery>
+#include <QJsonDocument>
 #include <QJsonArray>
 #include <QMetaEnum>
 #include "main.h"
@@ -25,14 +26,15 @@ public:
     };
 
 
-    unsigned int m_Level=(ALL&~DATA)|DEBUG; //ALL|INFO; //(ALL&~DATA)|DEBUG;
+    unsigned int m_Level=ALL|INFO; //(ALL&~DATA)|DEBUG; //ALL|INFO; //(ALL&~DATA)|DEBUG;
     QString ErrorText;
     QSqlQuery *query;
-    void saveState(QString, QJsonDocument);
+
 
 public slots:
     QJsonArray execute(QString);
     void message(unsigned int level, QString text);
+    void saveState(bool log, QJsonDocument);
 
 };
 

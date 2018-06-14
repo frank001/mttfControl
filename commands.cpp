@@ -16,8 +16,8 @@ Commands::Commands(QObject *parent) :
     connect(this, &Commands::message, (Handler*)parent, &Handler::message);
     connect(this, &Commands::writeUart, ((Handler*)parent)->m_uart, &uart::write);
     connect(this, &Commands::setHandlerState, (Handler*)parent, &Handler::setState);
-    connect(this, &Commands::setHandlerCycle, (Handler*)parent, &Handler::setHandlerCycle);
-
+    connect(this, &Commands::setHandlerCycleRun, (Handler*)parent, &Handler::setHandlerCycleRun);
+    connect(this, &Commands::getHandlerState, (Handler*)parent, &Handler::getHandlerState);
     message(COMMAND|WATCH, "Commands initialized.");
 
 
@@ -73,11 +73,13 @@ QByteArray Commands::HandleRaw(QString cmd, QString value){
         break;
     case getState:
         message(COMMAND|DEBUG, "Returning state.");
+        getHandlerState();
         //((Handler*)parent)->getState();
         //m_Handler->getState();
+
         break;
     case setState:
-        message(COMMAND|WARN, "Setting state: (TODO)"); //is this really needed here? state is set by commands
+        message(COMMAND|WARN, "Setting state: (TODO)"); //is this really needed here? state is set by commands or cycle commands
         break;
     case setVibrate:
         message(COMMAND|DEBUG, "Vibrate: " + value);
@@ -123,8 +125,9 @@ QByteArray Commands::HandleRaw(QString cmd, QString value){
         writeUart("all");
         break;
     case setCycle:
-        message(COMMAND|INFO, "Cycle: " + value);
-        setHandlerCycle(value.toInt());
+        message(COMMAND|INFO, "Cycle running: " + value);
+        setHandlerCycleRun(value.toInt());
+
         //m_cycle->start();       //TODO.
         break;
 

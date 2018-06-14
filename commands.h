@@ -28,7 +28,9 @@ signals:
 
     void setHandlerState(QString, QJsonValue value);
     void setHandlerConfig(QString, QJsonValue value);
-    void setHandlerCycle(int);
+    void setHandlerCycleRun(int);
+
+    void getHandlerState();
 
     uart *getUart();
 

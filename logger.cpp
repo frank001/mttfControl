@@ -15,6 +15,7 @@
 Logger::Logger(QString name, QString password, QObject *parent) : QObject(parent) {
     m_Database = QSqlDatabase::addDatabase("QODBC3");
     m_Database.setDatabaseName("DRIVER={SQL Server};Server=localhost\\SQLEXPRESS;Database=mttf;Uid="+name+";Pwd="+password+";");
+    //connect()
     message(DATA|INFO, "Logger start " + QDateTime::currentDateTime().toUTC().toString());
 
 }
@@ -62,8 +63,11 @@ QJsonArray Logger::execute(QString sql) {
     return records;
 }
 
-void Logger::saveState(QString field, QJsonDocument jd) {
-    execute("update currentState set "+field+" = '"+ jd.toJson() +"' where id=(select max(id) from currentState);");
+void Logger::saveState(bool log, QJsonDocument jd) {
+    //execute("update currentState set state= '"+ jd.toJson() +"' where id=(select max(id) from currentState);");
+    if (log)
+        execute("insert into currentState (state) values('"+ jd.toJson()+"');"); // where id=(select max(id) from currentState);");
+
 }
 
 bool Logger::logRequired(unsigned int level, QString text) {
@@ -98,3 +102,7 @@ void Logger::message(unsigned int level, QString text) {
     if (logRequired(level, text)) execute("insert into logControl (level, message) values ("+QString::number(level)+" ,'" + text +"');");
 
 }
+/*
+void Logger::stateChanged(QJsonDocument jd){
+
+}*/

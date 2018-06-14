@@ -31,6 +31,25 @@ CREATE TABLE [dbo].[logControl](
 GO
 
 
+****** Object:  Table [dbo].[currentState]    Script Date: 14-6-2018 17:02:01 ******
+SET ANSI_NULLS ON
+GO
+
+SET QUOTED_IDENTIFIER ON
+GO
+
+CREATE TABLE [dbo].[currentState](
+    [id] [bigint] IDENTITY(1,1) NOT NULL,
+    [timestamp] DATETIME NOT NULL DEFAULT(GETDATE()),
+    [config] [ntext] NULL,
+    [state] [ntext] NULL,
+     CONSTRAINT [PK_currentState] PRIMARY KEY CLUSTERED
+(
+    [id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+
 
 
 

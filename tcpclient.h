@@ -23,7 +23,7 @@ public slots:
     void disconnected();
     void readyRead();
     void taskResult(QByteArray);
-    void stateChanged(QJsonDocument);
+    void stateChanged(bool, QJsonDocument);
     void configChanged(QJsonDocument);
 
 signals:

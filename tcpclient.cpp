@@ -57,7 +57,7 @@ void tcpClient::taskResult(QByteArray result) {
     message(NETWORK|WATCH, "Result: " + msg );
     socket->write(result);
 }
-void tcpClient::stateChanged(QJsonDocument jd) {
+void tcpClient::stateChanged(bool log, QJsonDocument jd) {
     socket->write(jd.toBinaryData());
 }
 void tcpClient::configChanged(QJsonDocument jd) {

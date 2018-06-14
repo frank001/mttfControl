@@ -16,7 +16,7 @@ Handler::Handler(QObject *parent) : QObject(parent)
     m_Logger = new Logger("mttfControl", "topSecret", this);
     connect(this, &Handler::logExecute, m_Logger, &Logger::execute);
     connect(this, &Handler::logMessage, m_Logger, &Logger::message);
-
+    connect(this, &Handler::StateChanged, m_Logger, &Logger::saveState);
     //Database initialization
 
     /*
@@ -28,7 +28,7 @@ Handler::Handler(QObject *parent) : QObject(parent)
     logMessage(DATA|FATAL, "FATAL: Accessing database.");
     */
 
-    setConfig(logExecute("select top 1 config, state from currentState order by id desc;"));
+    setConfig(logExecute("select top 1 state from currentState order by id desc;"));
 
 
     //Serial port initialization
@@ -68,6 +68,9 @@ void Handler::setConfig(QJsonArray ja) {
     jdConfig = jdc;
 
     QJsonObject s;
+        s.insert("running", QJsonValue::fromVariant(0));
+        s.insert("cycles", QJsonValue::fromVariant(0));
+        s.insert("hours", QJsonValue::fromVariant(0));
         s.insert("vibrate", QJsonValue::fromVariant(0));
         s.insert("tubes", QJsonValue::fromVariant(0));
         s.insert("light", QJsonValue::fromVariant(0));
@@ -102,7 +105,11 @@ void Handler::setConfig(QJsonArray ja) {
 
 
         logMessage(DATA|WARN,"Creating default state record.");
-        logExecute("insert into currentState (config, state) values('"+ jdConfig.toJson()+"','"+jdState.toJson()+"');");
+        logExecute("insert into currentState (state) values('"+ jdState.toJson()+"');");
+
+        logMessage(DATA|WARN,"Creating default config record.");
+        logExecute("insert into currentConfig (config) values('"+ jdConfig.toJson() +"');");
+
         //writeConfig();
         //writeState();
 
@@ -152,15 +159,13 @@ void Handler::writeConfig() {
 
 
     QJsonDocument jdConfig(*joConfig);
-    m_dbObject->saveState("config", jdConfig);
+    //m_dbObject->saveState("config", jdConfig);
     logMessage(DATA|DEBUG, "Configuration saved: " +jdConfig.toJson());
 }
 
 void Handler::writeState() {
-
-
     QJsonDocument jdState(*joState);
-    m_dbObject->saveState("state", jdState);
+    //m_dbObject->saveState("state", jdState);
     logMessage(DATA|DEBUG, "State saved: "+ jdState.toJson());
 }
 
@@ -180,14 +185,15 @@ void Handler::getConfig(){
     emit ConfigChanged(jdConfig);
 }
 void Handler::getState() {
-    emit StateChanged(jdState);
+    emit StateChanged(false, jdState);
 }
 
-QJsonDocument Handler::jdUpdate(QJsonDocument jd, QString name, QString key, QJsonValue value) {
+bool Handler::jdUpdate(QJsonDocument jd, QString name, QString key, QJsonValue value) {
     QJsonObject joState = jdState.object();
     QJsonValue jvState = joState.value(name);
     QJsonObject joValues = jvState.toObject();
 
+    if (joValues.value(key)==value) return false;
 
     joValues.remove(key);
     joValues.insert(key, value);
@@ -195,9 +201,10 @@ QJsonDocument Handler::jdUpdate(QJsonDocument jd, QString name, QString key, QJs
     QJsonObject state;
     state.insert(name , joValues);
     QJsonDocument jds(state);
+    jdState =jds;
     //QString test = jds.toJson();
 
-    return jds;
+    return true;
 }
 
 void Handler::setState(QString key, QJsonValue value) {
@@ -218,8 +225,9 @@ void Handler::setState(QString key, QJsonValue value) {
     int j=0;
 
     */
-    jdState = jdUpdate(jdState, "state", key, value);
-    emit StateChanged(jdState);
+    bool success = jdUpdate(jdState, "state", key, value);
+    //writeState();
+    emit StateChanged(success, jdState);
 }
 
 void Handler::setConfig(QString, QJsonValue value) {
@@ -235,12 +243,25 @@ void Handler::message(unsigned int level, QString msg) {
 }
 void Handler::doorChange(int status){
     setState("door", status);
-    emit StateChanged(jdState);
+    emit StateChanged(true, jdState);   //temporary. TODO: sync with equipment when door opens or cycle stops... emit StateChange only once
 }
 void Handler::lightChange(int level) {
 
 }
-void Handler::setHandlerCycle(int level) {
-    m_Cycle->start();
+void Handler::setHandlerCycleRun(int level) {
+    setState("running", level);
+    if (level) {
+        m_Cycle->start();
+    } else {
+        m_Cycle->stop();              //TODO, done
 
+    }
+
+}
+void Handler::getHandlerState() {
+    emit StateChanged(false, jdState);
+}
+void Handler::setHandlerCycleIncrement() {
+    //bool success = jdUpdate(jdState, "state", key, value);
+    //emit StateChanged(success, jdState);
 }
