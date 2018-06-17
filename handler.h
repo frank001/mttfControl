@@ -32,7 +32,13 @@ private:
 
     QThread thread;
 
-    bool jdUpdate(QJsonDocument, QString, QString, QJsonValue);
+    QString sConfig;
+    QString sState;
+
+    bool jdUpdateState(QJsonDocument *, QString, QString, QJsonValue);
+    bool jdUpdateConfig(QString name, QString key, QJsonValue value);
+    void setHandlerInitialState(QJsonDocument);
+    void setHandlerInitialConfig(QJsonDocument);
 
 public:
     explicit Handler(QObject *parent = nullptr);
@@ -41,7 +47,7 @@ public:
 
     int logLevel();
     int logLevel(int level);
-    void setConfig(QJsonArray);
+    //void setHandlerConfig(QJsonArray);
     void setVibrate(int);
     void writeConfig();
     void writeState();
@@ -66,19 +72,22 @@ public slots:
     //void write(const QJsonObject &json);
     void uartWrite(QByteArray data);
     void message(unsigned int, QString);
-    void setState(QString, QJsonValue value);
-    void setConfig(QString, QJsonValue value);
+    void setHandlerState(QString, QJsonValue value);
+    void setHandlerConfig(QString, QJsonValue value);
+
     void getHandlerState();
+    void getHandlerConfig();
+
     void doorChange(int status);
     void lightChange(int level); //0 - off, 1 -  0.1mlux, 2 - 5mlux, 3 - 50lux
     void setHandlerCycleRun(int);
     void setHandlerCycleIncrement();
 
 signals:
-    QJsonArray logExecute(QString);
+    QJsonDocument logExecute(QString);
     void logMessage(unsigned int level, QString text);
     void StateChanged(bool, QJsonDocument);
-    void ConfigChanged(QJsonDocument);
+    void ConfigChanged(bool, QJsonDocument);
 
     //void startCycle(int);
 };

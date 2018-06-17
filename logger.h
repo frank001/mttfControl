@@ -26,15 +26,16 @@ public:
     };
 
 
-    unsigned int m_Level=ALL|INFO; //(ALL&~DATA)|DEBUG; //ALL|INFO; //(ALL&~DATA)|DEBUG;
+    unsigned int m_Level=ALL|INFO; //(ALL&~UART)|WATCH; //(ALL&~DATA)|DEBUG; //ALL|INFO; //(ALL&~DATA)|DEBUG;
     QString ErrorText;
     QSqlQuery *query;
 
 
 public slots:
-    QJsonArray execute(QString);
+    QJsonDocument execute(QString);
     void message(unsigned int level, QString text);
     void saveState(bool log, QJsonDocument);
+    void saveConfig(bool log, QJsonDocument);
 
 };
 

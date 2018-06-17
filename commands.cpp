@@ -12,12 +12,18 @@ Commands::Commands(QObject *parent) :
 
 {
 
-
     connect(this, &Commands::message, (Handler*)parent, &Handler::message);
     connect(this, &Commands::writeUart, ((Handler*)parent)->m_uart, &uart::write);
-    connect(this, &Commands::setHandlerState, (Handler*)parent, &Handler::setState);
-    connect(this, &Commands::setHandlerCycleRun, (Handler*)parent, &Handler::setHandlerCycleRun);
+
     connect(this, &Commands::getHandlerState, (Handler*)parent, &Handler::getHandlerState);
+    connect(this, &Commands::getHandlerConfig, (Handler*)parent, &Handler::getHandlerConfig);
+
+    connect(this, &Commands::setHandlerState, (Handler*)parent, &Handler::setHandlerState);
+
+
+    connect(this, &Commands::setHandlerCycleRun, (Handler*)parent, &Handler::setHandlerCycleRun);
+
+
     message(COMMAND|WATCH, "Commands initialized.");
 
 
@@ -67,6 +73,8 @@ QByteArray Commands::HandleRaw(QString cmd, QString value){
         message(COMMAND|DEBUG, "Returning config.");
         //m_Handler->getConfig();
         //((Handler*)parent)->getConfig();
+        getHandlerConfig();
+
         break;
     case setConfig:
         message(COMMAND|WARN, "Setting config: (TODO)");

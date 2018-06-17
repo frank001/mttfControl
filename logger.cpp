@@ -20,8 +20,10 @@ Logger::Logger(QString name, QString password, QObject *parent) : QObject(parent
 
 }
 
-QJsonArray Logger::execute(QString sql) {
-    QJsonArray records;
+QJsonDocument Logger::execute(QString sql) {
+    QJsonObject records;
+    QJsonDocument jd;
+
     QString msg = logRequired(DATA|DEBUG, "Executing query: " + sql);   //TODO: enable logging of queries, avoid loops. almost done. it logs to console only now.
     if (m_Database.open()) {
         query = new QSqlQuery;
@@ -42,9 +44,14 @@ QJsonArray Logger::execute(QString sql) {
                     QString fieldName = query->record().fieldName(i);
                     record.insert(fieldName, QJsonValue::fromVariant(query->value(i)));
                 }
-                records.push_back(record);
+                records.insert("data", record);
             }
             m_Database.close();
+            /*
+            QJsonObject state;
+            state.insert(name , joValues);
+            QJsonDocument jds(state);
+            */
         }
     } else {
         QSqlError err = m_Database.lastError();
@@ -53,17 +60,24 @@ QJsonArray Logger::execute(QString sql) {
         exit(EXIT_FAILURE);
 
     }
-    if (records.count()>0) {    //TODO: improve this. create function to return log yes/no.
+    if (records.count()>0) {    //TODO: improve this. create function to return log yes/no. Done...
                                 //now this is executed for each query regardless of actual logging to console or database
-        QJsonDocument jd;
 
-        jd.setArray(records);
+        QJsonDocument jds(records);
+        jd = jds;
+        //jd.setArray(records);
         logRequired(DATA|DEBUG, "Data: " + QString(jd.toJson()));
     }
-    return records;
+    return jd;
 }
 
 void Logger::saveState(bool log, QJsonDocument jd) {
+    //execute("update currentState set state= '"+ jd.toJson() +"' where id=(select max(id) from currentState);");
+    if (log)
+        execute("insert into currentState (state) values('"+ jd.toJson()+"');"); // where id=(select max(id) from currentState);");
+
+}
+void Logger::saveConfig(bool log, QJsonDocument jd) {
     //execute("update currentState set state= '"+ jd.toJson() +"' where id=(select max(id) from currentState);");
     if (log)
         execute("insert into currentState (state) values('"+ jd.toJson()+"');"); // where id=(select max(id) from currentState);");

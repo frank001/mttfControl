@@ -60,7 +60,8 @@ void tcpClient::taskResult(QByteArray result) {
 void tcpClient::stateChanged(bool log, QJsonDocument jd) {
     socket->write(jd.toBinaryData());
 }
-void tcpClient::configChanged(QJsonDocument jd) {
+void tcpClient::configChanged(bool log, QJsonDocument jd) {
+    QString test = jd.toJson();
     socket->write(jd.toBinaryData());
 }
 

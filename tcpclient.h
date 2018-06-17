@@ -24,7 +24,7 @@ public slots:
     void readyRead();
     void taskResult(QByteArray);
     void stateChanged(bool, QJsonDocument);
-    void configChanged(QJsonDocument);
+    void configChanged(bool, QJsonDocument);
 
 signals:
     void message(unsigned int level, QString message);
