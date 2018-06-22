@@ -208,6 +208,8 @@ void Handler::getHandlerConfig() {
     emit ConfigChanged(false, jdConfig);
 }
 void Handler::setHandlerCycleIncrement() {
+    m_CycleCount++;
+    jdUpdateState(&jdState, "state", "cycles", QJsonValue(m_CycleCount));
     //bool success = jdUpdate(jdState, "state", key, value);
     //emit StateChanged(success, jdState);
 }

@@ -25,7 +25,7 @@ private:
     bool m_b5mlux=false;
     bool m_b50lux=false;
 
-    unsigned int m_Speed = 1;           //debugging purpose, speed up/slow down cycle
+    unsigned int m_Speed = 10;           //debugging purpose, speed up/slow down cycle
 
     unsigned int m_CycleStart=0;
     unsigned int m_CycleDuration=720;       //total cycle time 12 minutes
@@ -48,6 +48,8 @@ private:
     //uart *m_uart;
     Commands *m_Command;
 
+
+
 private slots:
     void tmrCycleTimeout();
     void tmrTubesTimeout();
@@ -63,6 +65,7 @@ public:
 
 signals:
     void message(int level, QString msg);
+    void CycleIncrement();
 
 public slots:
 };

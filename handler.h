@@ -40,6 +40,9 @@ private:
     void setHandlerInitialState(QJsonDocument);
     void setHandlerInitialConfig(QJsonDocument);
 
+    int m_CycleCount = 0;
+
+
 public:
     explicit Handler(QObject *parent = nullptr);
     uart *m_uart;
@@ -88,6 +91,7 @@ signals:
     void logMessage(unsigned int level, QString text);
     void StateChanged(bool, QJsonDocument);
     void ConfigChanged(bool, QJsonDocument);
+
 
     //void startCycle(int);
 };

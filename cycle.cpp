@@ -16,6 +16,7 @@ Cycle::Cycle(QObject *parent) :
     connect(&m_Tmr5mlux, &QTimer::timeout, this, &Cycle::tmr5mluxTimeout);
     connect(&m_Tmr50lux, &QTimer::timeout, this, &Cycle::tmr50luxTimeout);
     connect(this, &Cycle::message, (Handler*)parent , &Handler::message);
+    connect(this, &Cycle::CycleIncrement, (Handler*)parent, &Handler::setHandlerCycleIncrement);
 
     m_Command = ((Handler*)parent)->m_Command;
 
@@ -41,6 +42,8 @@ void Cycle::start() {
     m_bCycle = true;
 
     m_TmrCycle.start(m_CycleDuration*1000/m_Speed);
+
+    CycleIncrement();
 
     message(COMMAND|WATCH, "1mlux on.");        //TODO: make this general and just start the timer as the others
     m_Command->HandleRaw("setLight","1");       //TODO: check current light level and only set it when different. Done, see Handler::jdUpdate
