@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include <QTimer>
-//#include "uart.h"
 #include "commands.h"
 
 class Cycle : public QObject
@@ -14,16 +13,16 @@ private:
     QTimer m_TmrVibrate;
     QTimer m_TmrTubes;
     QTimer m_Tmr01mlux;
-    QTimer m_Tmr5mlux;
-    QTimer m_Tmr50lux;
+    QTimer m_TmrLightLevel2;
+    QTimer m_TmrLightLevel3;
     QTimer m_TmrCycle;
 
     bool m_bCycle=false;
     bool m_bVibrate=false;
     bool m_bTubes=false;
     bool m_b01mlux=false;
-    bool m_b5mlux=false;
-    bool m_b50lux=false;
+    bool m_bLightLevel2=false;
+    bool m_bLightLevel3=false;
 
     unsigned int m_Speed = 10;           //debugging purpose, speed up/slow down cycle
 
@@ -39,10 +38,10 @@ private:
     unsigned int m_01mluxStart = 0;       //always on when other light levels are not - TODO
     unsigned int m_01mLuxDuration = 0;      //TODO
 
-    unsigned int m_5mluxStart = 180;        //5 mlux at 3 minutes
+    unsigned int m_LightLevel2Start = 180;        //5 mlux at 3 minutes
     unsigned int m_5mLuxDuration = 5;       // for 5 seconds
 
-    unsigned int m_50luxStart = 540;        // 50 lux at 9 minutes
+    unsigned int m_LightLevel3Start = 540;        // 50 lux at 9 minutes
     unsigned int m_50LuxDuration = 3;       // for 3 seconds
 
     //uart *m_uart;

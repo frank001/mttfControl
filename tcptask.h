@@ -25,7 +25,6 @@ public slots:
 
 signals:
     void Result(QByteArray);
-    void getState();
     void message(qint16 level, QString msg);
 
 protected:

@@ -15,7 +15,6 @@
 Logger::Logger(QString name, QString password, QObject *parent) : QObject(parent) {
     m_Database = QSqlDatabase::addDatabase("QODBC3");
     m_Database.setDatabaseName("DRIVER={SQL Server};Server=localhost\\SQLEXPRESS;Database=mttf;Uid="+name+";Pwd="+password+";");
-    //connect()
     message(DATA|INFO, "Logger start " + QDateTime::currentDateTime().toUTC().toString());
 
 }
@@ -47,11 +46,6 @@ QJsonDocument Logger::execute(QString sql) {
                 records.insert("data", record);
             }
             m_Database.close();
-            /*
-            QJsonObject state;
-            state.insert(name , joValues);
-            QJsonDocument jds(state);
-            */
         }
     } else {
         QSqlError err = m_Database.lastError();
@@ -60,28 +54,22 @@ QJsonDocument Logger::execute(QString sql) {
         exit(EXIT_FAILURE);
 
     }
-    if (records.count()>0) {    //TODO: improve this. create function to return log yes/no. Done...
-                                //now this is executed for each query regardless of actual logging to console or database
-
+    if (records.count()>0) {
         QJsonDocument jds(records);
         jd = jds;
-        //jd.setArray(records);
         logRequired(DATA|DEBUG, "Data: " + QString(jd.toJson()));
     }
     return jd;
 }
 
 void Logger::saveState(bool log, QJsonDocument jd) {
-    //execute("update currentState set state= '"+ jd.toJson() +"' where id=(select max(id) from currentState);");
     if (log)
         execute("insert into currentState (state) values('"+ jd.toJson()+"');"); // where id=(select max(id) from currentState);");
 
 }
 void Logger::saveConfig(bool log, QJsonDocument jd) {
-    //execute("update currentState set state= '"+ jd.toJson() +"' where id=(select max(id) from currentState);");
     if (log)
-        execute("insert into currentState (state) values('"+ jd.toJson()+"');"); // where id=(select max(id) from currentState);");
-
+        execute("insert into currentConfig (config) values('"+ jd.toJson()+"');"); // where id=(select max(id) from currentState);");
 }
 
 bool Logger::logRequired(unsigned int level, QString text) {
@@ -97,26 +85,20 @@ bool Logger::logRequired(unsigned int level, QString text) {
 
 
     if (((cur_cat)&m_cat) != cur_cat) return false;   //discard unwanted categories
-    if (cur_prio > m_prio  )  return false;
-    //{                 //only include specified priorities
+    if (cur_prio > m_prio  )  return false;           //discard unneeded priorities
 
-        msg = "[" + QDateTime::currentDateTime().toLocalTime().toString("yyyyMMdd hh:mm:ss") +"] "
+    //log to console
+    msg = "[" + QDateTime::currentDateTime().toLocalTime().toString("yyyyMMdd hh:mm:ss") +"] "
             + MetaEnum.valueToKey(cur_cat) + "|" + MetaEnum.valueToKey(cur_prio) + ": "
             + text;
-        QByteArray ba = msg.toLatin1();
-        const char *c_str = ba.data();
-        qInfo() << c_str;
-
-    //}
+    QByteArray ba = msg.toLatin1();
+    const char *c_str = ba.data();
+    qInfo() << c_str;
     return true;
 }
 
 void Logger::message(unsigned int level, QString text) {
-
     if (logRequired(level, text)) execute("insert into logControl (level, message) values ("+QString::number(level)+" ,'" + text +"');");
 
 }
-/*
-void Logger::stateChanged(QJsonDocument jd){
 
-}*/

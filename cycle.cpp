@@ -5,37 +5,32 @@
 #include "handler.h"
 #include "commands.h"
 
-//#include "uart.h"
-
 Cycle::Cycle(QObject *parent) :
     QObject(parent)
 {
     connect(&m_TmrCycle, &QTimer::timeout, this, &Cycle::tmrCycleTimeout);
     connect(&m_TmrTubes, &QTimer::timeout, this, &Cycle::tmrTubesTimeout);
     connect(&m_TmrVibrate, &QTimer::timeout, this, &Cycle::tmrVibrateTimeout);
-    connect(&m_Tmr5mlux, &QTimer::timeout, this, &Cycle::tmr5mluxTimeout);
-    connect(&m_Tmr50lux, &QTimer::timeout, this, &Cycle::tmr50luxTimeout);
+    connect(&m_TmrLightLevel2, &QTimer::timeout, this, &Cycle::tmr5mluxTimeout);
+    connect(&m_TmrLightLevel3, &QTimer::timeout, this, &Cycle::tmr50luxTimeout);
     connect(this, &Cycle::message, (Handler*)parent , &Handler::message);
-    connect(this, &Cycle::CycleIncrement, (Handler*)parent, &Handler::setHandlerCycleIncrement);
+    connect(this, &Cycle::CycleIncrement, (Handler*)parent, &Handler::incrementHandlerCycle);
 
     m_Command = ((Handler*)parent)->m_Command;
 
     m_TmrCycle.setSingleShot(true);
     m_TmrTubes.setSingleShot(true);
     m_TmrVibrate.setSingleShot(true);
-    m_Tmr5mlux.setSingleShot(true);
-    m_Tmr50lux.setSingleShot(true);
+    m_TmrLightLevel2.setSingleShot(true);
+    m_TmrLightLevel3.setSingleShot(true);
 }
 
 void Cycle::start() {
     message(COMMAND|WATCH, "Cycle start.");
 
-
-
-
     m_TmrVibrate.start((m_VibrateStart-1*m_Speed)*1000/m_Speed);    //TODO: get rid of the minus 1 second.
-    m_Tmr5mlux.start((m_5mluxStart-1*m_Speed)*1000/m_Speed);
-    m_Tmr50lux.start((m_50luxStart-1*m_Speed)*1000/m_Speed);
+    m_TmrLightLevel2.start((m_LightLevel2Start-1*m_Speed)*1000/m_Speed);
+    m_TmrLightLevel3.start((m_LightLevel3Start-1*m_Speed)*1000/m_Speed);
 
     m_TmrTubes.start((m_TubesStart-1*m_Speed)*1000/m_Speed);
 
@@ -43,32 +38,38 @@ void Cycle::start() {
 
     m_TmrCycle.start(m_CycleDuration*1000/m_Speed);
 
-    CycleIncrement();
 
-    message(COMMAND|WATCH, "1mlux on.");        //TODO: make this general and just start the timer as the others
+
+    message(COMMAND|WATCH, "Light level 1 on.");        //TODO: make this general and just start the timer as the others
     m_Command->HandleRaw("setLight","1");       //TODO: check current light level and only set it when different. Done, see Handler::jdUpdate
+
 }
 void Cycle::stop() {
     m_bCycle=false;
+    m_bTubes = false;
+    m_bVibrate = false;
+    m_bLightLevel2 = false;
+    m_bLightLevel3 = false;
+
     if (m_TmrCycle.isActive()) m_TmrCycle.stop();
     if (m_TmrVibrate.isActive()) m_TmrVibrate.stop();
-    if (m_Tmr5mlux.isActive()) m_Tmr5mlux.stop();
-    if (m_Tmr50lux.isActive()) m_Tmr50lux.stop();
+    if (m_TmrLightLevel2.isActive()) m_TmrLightLevel2.stop();
+    if (m_TmrLightLevel3.isActive()) m_TmrLightLevel3.stop();
     if (m_TmrTubes.isActive()) m_TmrTubes.stop();
     m_Command->HandleRaw("setLight","0");       //TODO: see above and sync with current machine state and only emit when cycle restarts
+
 }
 
 void Cycle::tmrCycleTimeout(){  //switch all off
     message(COMMAND|WATCH, "Cycle timeout.");
     m_bCycle = false;
+    CycleIncrement();
     start();
 
 }
-//void Cycle::handleTimeout(bool *b, )
 
 void Cycle::tmrTubesTimeout(){
     message(COMMAND|WATCH, "tube timeout.");
-    //if (!m_bCycle) return;
     if (!m_bTubes) {
         message(COMMAND|WATCH, "Tubes on.");
         m_Command->HandleRaw("setTubes","1");
@@ -77,10 +78,10 @@ void Cycle::tmrTubesTimeout(){
     } else {
         message(COMMAND|WATCH, "Tubes off.");
         m_Command->HandleRaw("setTubes","0");
-        //switch tubes off;
         m_bTubes = false;
     }
 }
+
 void Cycle::tmrVibrateTimeout(){
     message(COMMAND|WATCH, "Vibration timeout.");
     if (!m_bVibrate) {
@@ -96,30 +97,30 @@ void Cycle::tmrVibrateTimeout(){
     }
 }
 void Cycle::tmr5mluxTimeout() {
-    message(COMMAND|WATCH, "5mlux timeout.");
-    if (!m_b5mlux) {
-        message(COMMAND|WATCH, "5mlux on.");
+    message(COMMAND|WATCH, "LightLevel 2 timeout.");
+    if (!m_bLightLevel2) {
+        message(COMMAND|WATCH, "LightLevel 2 on.");
         m_Command->HandleRaw("setLight","2");
-        m_b5mlux = true;
-        m_Tmr5mlux.start(m_5mLuxDuration*1000/m_Speed);
+        m_bLightLevel2 = true;
+        m_TmrLightLevel2.start(m_5mLuxDuration*1000/m_Speed);
     } else {
-        message(COMMAND|WATCH, "1mlux on.");
+        message(COMMAND|WATCH, "LightLevel 1 on.");
         m_Command->HandleRaw("setLight","1");
-        m_b5mlux = false;
-        m_Tmr5mlux.stop();
+        m_bLightLevel2 = false;
+        m_TmrLightLevel2.stop();
     }
 }
 void Cycle::tmr50luxTimeout() {
-    message(COMMAND|WATCH, "50lux timeout.");
-    if (!m_b50lux) {
-        message(COMMAND|WATCH, "50lux on.");
+    message(COMMAND|WATCH, "LightLevel 3 timeout.");
+    if (!m_bLightLevel3) {
+        message(COMMAND|WATCH, "LightLevel 3 on.");
         m_Command->HandleRaw("setLight","3");
-        m_b50lux = true;
-        m_Tmr50lux.start(m_50LuxDuration*1000/m_Speed);
+        m_bLightLevel3 = true;
+        m_TmrLightLevel3.start(m_50LuxDuration*1000/m_Speed);
     } else {
-        message(COMMAND|WATCH, "1mlux on.");
+        message(COMMAND|WATCH, "LightLevel 1 on.");
         m_Command->HandleRaw("setLight","1");
-        m_b50lux = false;
-        m_Tmr50lux.stop();
+        m_bLightLevel3 = false;
+        m_TmrLightLevel3.stop();
     }
 }

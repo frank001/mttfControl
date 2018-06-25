@@ -32,6 +32,5 @@ void tcpServer::incomingConnection(qintptr socketDescriptor) {
 
     message(NETWORK|DEBUG, "Client connecting.");
     tcpClient *client = new tcpClient(m_Config);
-    //client->setConfig(cfg);
     client->setSocket(socketDescriptor);
 }

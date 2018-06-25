@@ -3,8 +3,7 @@
 
 #include <QObject>
 #include <QMetaEnum>
-#include <QJsonObject>
-//#include "handler.h"
+#include <QJsonDocument>
 #include "uart.h"
 
 
@@ -15,9 +14,13 @@ class Commands : public QObject
 
 public:
     explicit Commands(QObject *parent = nullptr);
-    enum eCommands { getConfig, setConfig, getState, setState, setVibrate, setTubes, setLight, getStatus, setCycle, stopCycle };
-    enum eLightLevel { llOff, ll01mlux, ll5mlux, ll50lux };
-    //Handler *m_Handler;
+    enum eCommands {
+        getConfig, setConfig, getState, setState, setVibrate, setTubes, setLight, getStatus,
+        setCycle, stopCycle, getPorts, resetUart
+                   };
+    enum eLightLevel { lightlevel0, lightlevel1, lightlevel2, lightlevel3 };
+    QJsonDocument jdPorts;
+
 
 private:
     QMetaEnum MetaEnum;
@@ -29,11 +32,13 @@ signals:
     void setHandlerState(QString, QJsonValue value);
     void setHandlerConfig(QString, QJsonValue value);
 
-    void setHandlerCycleRun(int);
+    void setHandlerCycle(int);
 
     void getHandlerState();
     void getHandlerConfig();
-    uart *getUart();
+
+    void resetHandlerUart(QString);
+
 
 
 public slots:

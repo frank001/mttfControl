@@ -1,5 +1,6 @@
 #ifndef CONFIG_H
 #define CONFIG_H
+#include <QCoreApplication>
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QtSerialPort/QSerialPort>
@@ -7,6 +8,7 @@
 #include "uart.h"
 #include "cycle.h"
 #include "commands.h"
+
 
 class Handler : public QObject
 {
@@ -16,10 +18,10 @@ private:
     int mLogLevel=0;
     int mVibrate=0;
 
-    int mBaudRate=115200;
+    int mBaudRate=9600;
     int mDataBits=8;
     int mStopBits=1;
-    char mParity ='n';
+    char mParity = 'n';
     QString mPortName="COM1";
 
     Logger *m_dbObject;
@@ -35,7 +37,7 @@ private:
     QString sConfig;
     QString sState;
 
-    bool jdUpdateState(QJsonDocument *, QString, QString, QJsonValue);
+    bool jdUpdateState(QString, QString, QJsonValue);
     bool jdUpdateConfig(QString name, QString key, QJsonValue value);
     void setHandlerInitialState(QJsonDocument);
     void setHandlerInitialConfig(QJsonDocument);
@@ -44,56 +46,41 @@ private:
 
 
 public:
-    explicit Handler(QObject *parent = nullptr);
+    explicit Handler(QCoreApplication *parent = nullptr);
     uart *m_uart;
     Commands *m_Command;
 
-    int logLevel();
-    int logLevel(int level);
-    //void setHandlerConfig(QJsonArray);
-    void setVibrate(int);
-    void writeConfig();
-    void writeState();
-
     QJsonDocument jdConfig;
     QJsonDocument jdState;
+    QJsonDocument jdPorts;
 
-    QJsonObject *joConfig;
-    QJsonObject *joState;
+    QJsonObject joConfig;
+    QJsonObject joState;
 
-    QJsonObject uartResult;
-
-
-
+    int logLevel();
+    int logLevel(int level);
 
 public slots:
 
-    //QJsonObject *getConfig();
-    void getState();
-    void getConfig();
-    //void read(const QJsonObject &json);
-    //void write(const QJsonObject &json);
-    void uartWrite(QByteArray data);
     void message(unsigned int, QString);
     void setHandlerState(QString, QJsonValue value);
     void setHandlerConfig(QString, QJsonValue value);
-
     void getHandlerState();
     void getHandlerConfig();
 
-    void doorChange(int status);
-    void lightChange(int level); //0 - off, 1 -  0.1mlux, 2 - 5mlux, 3 - 50lux
-    void setHandlerCycleRun(int);
-    void setHandlerCycleIncrement();
+
+    void setHandlerDoor(int status);
+    void setHandlerCycle(int);
+    void incrementHandlerCycle();
+
+    void resetHandlerUart(QString);
 
 signals:
     QJsonDocument logExecute(QString);
     void logMessage(unsigned int level, QString text);
     void StateChanged(bool, QJsonDocument);
     void ConfigChanged(bool, QJsonDocument);
-
-
-    //void startCycle(int);
+    void closePort();
 };
 
 #endif // CONFIG_H

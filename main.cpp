@@ -15,18 +15,11 @@
 
 tcpServer *tcpserver;
 
-//QSerialPort serialPort;
-
-
 
 int main(int argc, char *argv[]) {
     QCoreApplication a(argc, argv);
 
-
-    //QSerialPort serialPort;
-
     Handler *handler = new Handler(&a);
-
 
     tcpserver = new tcpServer(handler);
     tcpserver->startServer();

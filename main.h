@@ -51,6 +51,15 @@ CREATE TABLE [dbo].[currentState](
 GO
 
 
+//show log with error level
+SELECT distinct convert(varchar(100), message), (level & 1), count((level&1))
+  FROM [mttf].[dbo].[logControl]
+  group by convert(varchar(100), message), (level & 1)
+  having (level & 1)=1
+  ;
+
+select * from logControl where level=0;
+
 
 
 

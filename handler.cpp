@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
@@ -11,7 +12,9 @@
 #include "main.h"
 #include "cycle.h"
 
-Handler::Handler(QObject *parent) : QObject(parent)
+
+
+Handler::Handler(QCoreApplication *parent) : QObject(parent)
 {
     //Database initialization
     m_Logger = new Logger("mttfControl", "topSecret", this);
@@ -20,22 +23,43 @@ Handler::Handler(QObject *parent) : QObject(parent)
     connect(this, &Handler::logExecute, m_Logger, &Logger::execute);
     connect(this, &Handler::logMessage, m_Logger, &Logger::message);
     connect(this, &Handler::StateChanged, m_Logger, &Logger::saveState);
-
-
+    connect(this, &Handler::ConfigChanged, m_Logger, &Logger::saveConfig);
 
     setHandlerInitialConfig(logExecute("select top 1 config from currentConfig order by id desc;"));
     setHandlerInitialState(logExecute("select top 1 state from currentState order by id desc;"));
 
-
-
-    m_uart = new uart(nullptr, &thread);
+    m_uart = new uart(joConfig["portname"].toString(), joConfig["baudrate"].toInt(), &thread);                        //TODO: review this. The timer error message is a qt bug. remove the threading.
     connect(m_uart, &uart::message, this, &Handler::message);
-    connect(m_uart, &uart::doorChange, this, &Handler::doorChange);
+    connect(m_uart, &uart::doorChange, this, &Handler::setHandlerDoor);
+    connect(this, &Handler::closePort, m_uart, &uart::closePort);
+    m_uart->initialize();
     thread.start();
 
     m_Command = new Commands(this);
 
+    QJsonObject ports;
+    ports.insert("ports" , m_uart->joPorts);
+    QJsonDocument jdp(ports);
+    QString test = jdp.toJson();
+    jdPorts = jdp;
+
+    m_Command->jdPorts = jdp;
+
     m_Cycle = new Cycle(this);
+
+
+
+    message(COMMAND|INFO, "Initializing MTTF equipment");
+
+    //TODO: if state is running at startup, cancel initialization and log error. restart cycle from zero.
+
+    m_CycleCount = joState["cycles"].toInt();
+    m_Command->HandleRaw("setLight", QString::number(joState["light"].toInt()));
+    m_Command->HandleRaw("setVibrate", QString::number(joState["vibrate"].toInt()));
+
+    m_Command->HandleRaw("setCycle", QString::number(joState["running"].toInt()));
+    m_Command->HandleRaw("setTubes", QString::number(joState["tubes"].toInt()));
+
 
 
 }
@@ -57,15 +81,9 @@ void Handler::setHandlerInitialState(QJsonDocument jd) {
         jdState = jds;
         logExecute("insert into currentState (state) values('"+ jdState.toJson()+"');");
     } else {
-//        jd.object().value("data")["state"].toString().toUtf8();
-
-        //QJsonObject joResponse = jd.object();
-        //QJsonValue jvData = joResponse.value("data");
-        //QString json = jvData["state"].toString();
-        //QByteArray ba = json.toUtf8();
 
         jdState = QJsonDocument::fromJson(jd.object().value("data")["state"].toString().toUtf8());
-
+        joState = jdState.object().value("state").toObject();
         logMessage(DATA|WATCH,"Current state loaded");      //TODO: check for state differences equipment vs database
     }
 }
@@ -84,30 +102,12 @@ void Handler::setHandlerInitialConfig(QJsonDocument jd) {
         sConfig = jdConfig.toJson();
         logExecute("insert into currentConfig (config) values('"+ jdConfig.toJson()+"');");
     } else {
-        QJsonObject joResponse = jd.object();
-        QJsonValue jvData = joResponse.value("data");
-        QString json = jvData["config"].toString();
-        QByteArray ba = json.toUtf8();
-        jdConfig = QJsonDocument::fromJson(ba);
+        jdConfig = QJsonDocument::fromJson(jd.object().value("data")["config"].toString().toUtf8());
+        joConfig = jdConfig.object().value("config").toObject();
         logMessage(DATA|WATCH,"Current config loaded");
 
     }
     logMessage(DATA|WATCH,"Configuration complete.");
-}
-
-void Handler::writeConfig() {
-
-
-
-    QJsonDocument jdConfig(*joConfig);
-    //m_dbObject->saveState("config", jdConfig);
-    logMessage(DATA|DEBUG, "Configuration saved: " +jdConfig.toJson());
-}
-
-void Handler::writeState() {
-    QJsonDocument jdState(*joState);
-    //m_dbObject->saveState("state", jdState);
-    logMessage(DATA|DEBUG, "State saved: "+ jdState.toJson());
 }
 
 
@@ -117,19 +117,11 @@ int Handler::logLevel(int level) {
     logMessage(DATA|INFO,"Log Level changed to: " + QString::number(level));
     return mLogLevel;
 }
-void Handler::setVibrate(int OnOff) {
-    mVibrate = OnOff;
-    writeState();
-}
 
-void Handler::getConfig(){
-    emit ConfigChanged(false, jdConfig);
-}
-void Handler::getState() {
-    emit StateChanged(false, jdState);
-}
 
-bool Handler::jdUpdateState(QJsonDocument *jd, QString name, QString key, QJsonValue value) {
+
+
+bool Handler::jdUpdateState(QString name, QString key, QJsonValue value) {
     QJsonObject joState = jdState.object();
     QJsonValue jvState = joState.value(name);
     QJsonObject joValues = jvState.toObject();
@@ -143,13 +135,13 @@ bool Handler::jdUpdateState(QJsonDocument *jd, QString name, QString key, QJsonV
     state.insert(name , joValues);
     QJsonDocument jds(state);
     jdState = jds;
-
+    joState = jdState.object();
     return true;
 }
 bool Handler::jdUpdateConfig(QString name, QString key, QJsonValue value) {
-    QJsonObject joConfig = jdConfig.object();
-    QJsonValue jvConfig = joConfig.value(name);
-    QJsonObject joValues = jvConfig.toObject();
+    QJsonObject joc = jdConfig.object();
+    QJsonValue jvc = joc.value(name);
+    QJsonObject joValues = jvc.toObject();
 
     if (joValues.value(key)==value) return false;
 
@@ -159,14 +151,14 @@ bool Handler::jdUpdateConfig(QString name, QString key, QJsonValue value) {
     QJsonObject config;
     config.insert(name , joValues);
     QJsonDocument jdc(config);
-    jdState = jdc;
-
+    jdConfig = jdc;
+    joConfig = jdConfig.object();
     return true;
 }
 
 
 void Handler::setHandlerState(QString key, QJsonValue value) {
-    bool success = jdUpdateState(&jdState, "state", key, value);
+    bool success = jdUpdateState("state", key, value);
     emit StateChanged(success, jdState);
 }
 
@@ -177,39 +169,59 @@ void Handler::setHandlerConfig(QString key, QJsonValue value) {
 
 }
 
-void Handler::uartWrite(QByteArray data) {
-    //m_uart->write(data);
-    //uart(this->serialPort).write(data);
-}
-
 void Handler::message(unsigned int level, QString msg) {
     logMessage(level, msg);
 }
-void Handler::doorChange(int status){
+void Handler::setHandlerDoor(int status){
+    //TODO: sync state with machine and log error
     setHandlerState("door", status);
     emit StateChanged(true, jdState);   //temporary. TODO: sync with equipment when door opens or cycle stops... emit StateChange only once
 }
-void Handler::lightChange(int level) {
 
-}
-void Handler::setHandlerCycleRun(int level) {       //level: start, stop, resume
-    setHandlerState("running", level);
+void Handler::setHandlerCycle(int level) {       //level: start, stop, resume
     if (level)
         m_Cycle->start();
     else
+        //TODO: sync timerstate with database (new table) and implement resume function
         m_Cycle->stop();
+    setHandlerState("running", level);
 }
 
 void Handler::getHandlerState() {
     emit StateChanged(false, jdState);
 }
 void Handler::getHandlerConfig() {
-    //QString test = jdConfig.toJson();
     emit ConfigChanged(false, jdConfig);
 }
-void Handler::setHandlerCycleIncrement() {
+
+
+void Handler::incrementHandlerCycle() {
     m_CycleCount++;
-    jdUpdateState(&jdState, "state", "cycles", QJsonValue(m_CycleCount));
-    //bool success = jdUpdate(jdState, "state", key, value);
-    //emit StateChanged(success, jdState);
+    jdUpdateState("state", "cycles", QJsonValue(m_CycleCount));
+}
+void Handler::resetHandlerUart(QString newConfig) {
+    int i=0;
+    QStringList data = newConfig.split(",");
+    jdUpdateConfig("config", "portname", data[0]);
+    jdUpdateConfig("config", "baudrate", data[1].toInt());
+    emit ConfigChanged(true, jdConfig);
+
+    emit closePort();
+    thread.exit();
+    m_uart = new uart(joConfig["portname"].toString(), joConfig["baudrate"].toInt(), &thread);
+    thread.start();
+    //TODO: restruct Handler / uart / command / socket
+    //  Handler
+    //      - LOGGER
+    //      - SERVER
+    //          - SOCKET
+    //          - CLIENT
+    //          - TASK
+    //      - UART
+    //          - PORT
+    //      - COMMAND
+    //          - CYCLE
+
+
+
 }
