@@ -60,7 +60,12 @@ SELECT distinct convert(varchar(100), message), (level & 1), count((level&1))
 
 select * from logControl where level=0;
 
-
+//select state without newlines
+SELECT [id]
+      ,[timestamp]
+      ,REPLACE(convert(varchar(255),[state]),CHAR(10),'')
+  FROM [mttf].[dbo].[currentState]
+  order by id desc;
 
 
 
