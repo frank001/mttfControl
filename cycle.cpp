@@ -102,7 +102,7 @@ void Cycle::tmr5mluxTimeout() {
         message(COMMAND|WATCH, "LightLevel 2 on.");
         m_Command->HandleRaw("setLight","2");
         m_bLightLevel2 = true;
-        m_TmrLightLevel2.start(m_5mLuxDuration*1000/m_Speed);
+        m_TmrLightLevel2.start(m_LightLevel2Duration*1000/m_Speed);
     } else {
         message(COMMAND|WATCH, "LightLevel 1 on.");
         m_Command->HandleRaw("setLight","1");
@@ -116,7 +116,7 @@ void Cycle::tmr50luxTimeout() {
         message(COMMAND|WATCH, "LightLevel 3 on.");
         m_Command->HandleRaw("setLight","3");
         m_bLightLevel3 = true;
-        m_TmrLightLevel3.start(m_50LuxDuration*1000/m_Speed);
+        m_TmrLightLevel3.start(m_LightLevel3Duration*1000/m_Speed);
     } else {
         message(COMMAND|WATCH, "LightLevel 1 on.");
         m_Command->HandleRaw("setLight","1");

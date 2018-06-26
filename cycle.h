@@ -24,7 +24,7 @@ private:
     bool m_bLightLevel2=false;
     bool m_bLightLevel3=false;
 
-    unsigned int m_Speed = 10;           //debugging purpose, speed up/slow down cycle
+    unsigned int m_Speed = 1;           //debugging purpose, speed up/slow down cycle
 
     unsigned int m_CycleStart=0;
     unsigned int m_CycleDuration=720;       //total cycle time 12 minutes
@@ -35,14 +35,14 @@ private:
     unsigned int m_VibrateStart=600;        //start vibration at 10 minutes
     unsigned int m_VibrateDuration=120;     //vibration duration 2 minutes
 
-    unsigned int m_01mluxStart = 0;       //always on when other light levels are not - TODO
-    unsigned int m_01mLuxDuration = 0;      //TODO
+    unsigned int m_LightLevel1Start = 0;       //always on when other light levels are not - TODO
+    unsigned int m_LightLevel1Duration = 0;      //TODO
 
     unsigned int m_LightLevel2Start = 180;        //5 mlux at 3 minutes
-    unsigned int m_5mLuxDuration = 5;       // for 5 seconds
+    unsigned int m_LightLevel2Duration = 5;       // for 5 seconds
 
     unsigned int m_LightLevel3Start = 540;        // 50 lux at 9 minutes
-    unsigned int m_50LuxDuration = 3;       // for 3 seconds
+    unsigned int m_LightLevel3Duration = 3;       // for 3 seconds
 
     //uart *m_uart;
     Commands *m_Command;

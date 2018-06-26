@@ -54,12 +54,12 @@ Handler::Handler(QCoreApplication *parent) : QObject(parent)
     //TODO: if state is running at startup, cancel initialization and log error. restart cycle from zero.
 
     m_CycleCount = joState["cycles"].toInt();
-    m_Command->HandleRaw("setLight", QString::number(joState["light"].toInt()));
+    /*m_Command->HandleRaw("setLight", QString::number(joState["light"].toInt()));
     m_Command->HandleRaw("setVibrate", QString::number(joState["vibrate"].toInt()));
 
     m_Command->HandleRaw("setCycle", QString::number(joState["running"].toInt()));
     m_Command->HandleRaw("setTubes", QString::number(joState["tubes"].toInt()));
-
+    */
 
 
 }
@@ -184,6 +184,7 @@ void Handler::setHandlerCycle(int level) {       //level: start, stop, resume
     else
         //TODO: sync timerstate with database (new table) and implement resume function
         m_Cycle->stop();
+    //m_Command->HandleRaw()
     setHandlerState("running", level);
 }
 
