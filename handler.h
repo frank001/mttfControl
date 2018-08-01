@@ -67,7 +67,9 @@ public slots:
     void setHandlerConfig(QString, QJsonValue value);
     void getHandlerState();
     void getHandlerConfig();
+    void setHandlerPosition(QString, QString);
 
+    void newHandlerCycle(QString, QJsonValue);
 
     void setHandlerDoor(int status);
     void setHandlerCycle(int);
