@@ -194,7 +194,22 @@ void Handler::getHandlerState() {
 void Handler::getHandlerConfig() {
     emit ConfigChanged(false, jdConfig);
 }
+void Handler::setHandlerPosition(QString value, QString) {
+    //TODO: implement new cycle setting, description and remarks.
+    logMessage(DATA|ERROR, "setPosition not yet implemented.");
+}
+void Handler::newHandlerCycle(QString todo, QJsonValue value) {
+    //TODO: Just store the damn json string in the database as an string instead of
+    //      this mess.
 
+
+    //QJsonDocument doc = QJsonDocument::fromJson(value.toUtf8());
+    QJsonObject jo = value.toObject();
+    QString desc = jo.value("description").toString();
+    QString rem = jo.value("remarks").toString();
+    logExecute("insert into cycles (description, remarks) values ('"+desc+"','"+ rem +"')");
+    logMessage(DATA|ERROR, "newCycle not yet implemented.");
+}
 
 void Handler::incrementHandlerCycle() {
     m_CycleCount++;

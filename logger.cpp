@@ -26,6 +26,7 @@ QJsonDocument Logger::execute(QString sql) {
     QString msg = logRequired(DATA|DEBUG, "Executing query: " + sql);   //TODO: enable logging of queries, avoid loops. almost done. it logs to console only now.
     if (m_Database.open()) {
         query = new QSqlQuery;
+
         query->prepare(sql);
         if (!query->exec()) {   //an error occured
 

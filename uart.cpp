@@ -93,7 +93,7 @@ void uart::write(const QByteArray &writeData) {
 
 void uart::handleReadyRead() {
     if (!m_serialPort.isOpen()) {
-        message(UART|ERROR, "Port is closed!");
+        //message(UART|ERROR, "Port is closed!");
         return;
     }
     QByteArray data = m_serialPort.readAll();
