@@ -199,17 +199,15 @@ void Handler::setHandlerPosition(QString value, QString) {
     logMessage(DATA|ERROR, "setPosition not yet implemented.");
 }
 void Handler::newHandlerCycle(QString todo, QJsonValue value) {
-    //TODO: Just store the damn json string in the database as an string instead of
-    //      this mess.
-
-
-    //QJsonDocument doc = QJsonDocument::fromJson(value.toUtf8());
     QJsonObject jo = value.toObject();
-    QString desc = jo.value("description").toString();
-    QString rem = jo.value("remarks").toString();
-    logExecute("insert into cycles (description, remarks) values ('"+desc+"','"+ rem +"')");
-    logMessage(DATA|ERROR, "newCycle not yet implemented.");
+    QJsonDocument jd = QJsonDocument::fromVariant(value.toVariant());
+    logExecute("insert into cycles (data) values ('" + jd.toJson() +"');");
+    setHandlerCycle(0);     //stop any running cycle
+    m_CycleCount = 0;       //reset cycle count
+    setHandlerState("cycles", QJsonValue(m_CycleCount));
+    logMessage(DATA|INFO, "New Cycle saved.");
 }
+
 
 void Handler::incrementHandlerCycle() {
     m_CycleCount++;
