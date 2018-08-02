@@ -25,8 +25,10 @@ Handler::Handler(QCoreApplication *parent) : QObject(parent)
     connect(this, &Handler::StateChanged, m_Logger, &Logger::saveState);
     connect(this, &Handler::ConfigChanged, m_Logger, &Logger::saveConfig);
 
+
     setHandlerInitialConfig(logExecute("select top 1 config from currentConfig order by id desc;"));
     setHandlerInitialState(logExecute("select top 1 state from currentState order by id desc;"));
+    setHandlerInitialCycle(logExecute("select top 1 data from cycles order by id desc;"));
 
     m_uart = new uart(joConfig["portname"].toString(), joConfig["baudrate"].toInt(), &thread);                        //TODO: review this. The timer error message is a qt bug. remove the threading.
     connect(m_uart, &uart::message, this, &Handler::message);
@@ -110,6 +112,35 @@ void Handler::setHandlerInitialConfig(QJsonDocument jd) {
     logMessage(DATA|WATCH,"Configuration complete.");
 }
 
+void Handler::setHandlerInitialCycle(QJsonDocument jd) {
+    if (jd.isEmpty()) { //create default cycle record
+        logMessage(DATA|WARN,"Creating default cycle record.");
+        QJsonObject c;
+
+        c.insert("description", QJsonValue::fromVariant("Default Cycle"));
+        c.insert("remarks", QJsonValue::fromVariant("Created by mttfControl"));
+        QJsonArray ja = QJsonArray();
+        for (int i=0;i<18;i++) {
+            ja.push_back(QJsonValue::fromVariant("EMPTY" + QString::number(i)));
+        }
+
+
+        c.insert("positions",  ja);
+
+        QJsonObject cycle;
+        cycle.insert("cycle" , c);
+        QJsonDocument jdc(cycle);
+        jdCycle = jdc;
+        sCycle = jdCycle.toJson();
+        logExecute("insert into cycles (data) values('"+ jdCycle.toJson()+"');");
+    } else {
+        QString jds = jd.toJson();
+        jdCycle = QJsonDocument::fromJson(jd.object().value("data")["data"].toString().toUtf8());
+        joCycle = jdCycle.object().value("cycle").toObject();
+        sCycle = jdCycle.toJson();
+        logMessage(DATA|WATCH,"Current cycle loaded");
+    }
+}
 
 int Handler::logLevel() { return mLogLevel; } //TODO: Review/remove this
 int Handler::logLevel(int level) {
@@ -165,8 +196,6 @@ void Handler::setHandlerState(QString key, QJsonValue value) {
 void Handler::setHandlerConfig(QString key, QJsonValue value) {
     bool success = jdUpdateConfig("config", key, value);
     emit ConfigChanged(success, jdConfig);
-
-
 }
 
 void Handler::message(unsigned int level, QString msg) {
@@ -194,6 +223,10 @@ void Handler::getHandlerState() {
 void Handler::getHandlerConfig() {
     emit ConfigChanged(false, jdConfig);
 }
+void Handler::getHandlerCycle() {
+    emit CycleChanged(false, jdCycle);
+}
+
 void Handler::setHandlerPosition(QString value, QString) {
     //TODO: implement new cycle setting, description and remarks.
     logMessage(DATA|ERROR, "setPosition not yet implemented.");

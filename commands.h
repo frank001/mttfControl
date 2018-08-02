@@ -16,7 +16,7 @@ public:
     explicit Commands(QObject *parent = nullptr);
     enum eCommands {
         getConfig, setConfig, getState, setState, setVibrate, setTubes, setLight, getStatus,
-        setCycle, stopCycle, getPorts, resetUart, setPosition, newCycle
+        setCycle, stopCycle, getPorts, resetUart, setPosition, newCycle, getCycle
                    };
     enum eLightLevel { lightlevel0, lightlevel1, lightlevel2, lightlevel3 };
     QJsonDocument jdPorts;
@@ -37,7 +37,9 @@ signals:
 
     void getHandlerState();
     void getHandlerConfig();
-    void setHandlerPosition(QString, QString);
+    void getHandlerCycle();
+
+    void setHandlerPosition(QString, QString); //todo: remove this
 
     void resetHandlerUart(QString);
 

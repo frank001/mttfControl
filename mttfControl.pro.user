@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<<<<<<< HEAD
-<!-- Written by QtCreator 4.6.0, 2018-08-01T15:33:19. -->
-=======
-<!-- Written by QtCreator 4.6.0, 2018-08-01T07:18:28. -->
->>>>>>> 1daaa4204ce0d3b6dba4c75419ea6f269701fc9b
+<!-- Written by QtCreator 4.6.0, 2018-08-02T13:32:48. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -296,7 +292,7 @@
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.ProFile">mttfControl.pro</value>
     <value type="bool" key="Qt4ProjectManager.Qt4RunConfiguration.UseDyldImageSuffix">false</value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.UserWorkingDirectory"></value>
-    <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.UserWorkingDirectory.default"></value>
+    <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.UserWorkingDirectory.default">Z:/projects/Qt/build-mttfControl-Desktop_Qt_5_11_0_MSVC2015_64bit2-Debug</value>
     <value type="uint" key="RunConfiguration.QmlDebugServerPort">3768</value>
     <value type="bool" key="RunConfiguration.UseCppDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseCppDebuggerAuto">true</value>

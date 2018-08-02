@@ -17,6 +17,8 @@ Commands::Commands(QObject *parent) :
 
     connect(this, &Commands::getHandlerState, (Handler*)parent, &Handler::getHandlerState);
     connect(this, &Commands::getHandlerConfig, (Handler*)parent, &Handler::getHandlerConfig);
+    connect(this, &Commands::getHandlerCycle, (Handler*)parent, &Handler::getHandlerCycle);
+
     connect(this, &Commands::setHandlerPosition, (Handler*)parent, &Handler::setHandlerPosition);
     connect(this, &Commands::newHandlerCycle, (Handler*)parent, &Handler::newHandlerCycle);
 
@@ -141,6 +143,10 @@ QByteArray Commands::HandleRaw(QString cmd, QJsonValue value){
     case newCycle:
         newHandlerCycle("", value);
         //message(COMMAND|ERROR, "Command not yet implemented (TODO): " + cmd +": " + value);
+        break;
+    case getCycle:
+        message(COMMAND|DEBUG, "Returning cycle.");
+        getHandlerCycle();
         break;
     default:
         message(COMMAND|ERROR, "Unknown command: " + cmd +": " + value.toString());

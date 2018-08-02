@@ -36,11 +36,13 @@ private:
 
     QString sConfig;
     QString sState;
+    QString sCycle;
 
     bool jdUpdateState(QString, QString, QJsonValue);
     bool jdUpdateConfig(QString name, QString key, QJsonValue value);
     void setHandlerInitialState(QJsonDocument);
     void setHandlerInitialConfig(QJsonDocument);
+    void setHandlerInitialCycle(QJsonDocument);
 
     int m_CycleCount = 0;
 
@@ -53,9 +55,11 @@ public:
     QJsonDocument jdConfig;
     QJsonDocument jdState;
     QJsonDocument jdPorts;
+    QJsonDocument jdCycle;
 
     QJsonObject joConfig;
     QJsonObject joState;
+    QJsonObject joCycle;
 
     int logLevel();
     int logLevel(int level);
@@ -67,6 +71,8 @@ public slots:
     void setHandlerConfig(QString, QJsonValue value);
     void getHandlerState();
     void getHandlerConfig();
+    void getHandlerCycle();
+
     void setHandlerPosition(QString, QString);
 
     void newHandlerCycle(QString, QJsonValue);
@@ -82,6 +88,7 @@ signals:
     void logMessage(unsigned int level, QString text);
     void StateChanged(bool, QJsonDocument);
     void ConfigChanged(bool, QJsonDocument);
+    void CycleChanged(bool, QJsonDocument);
     void closePort();
 };
 

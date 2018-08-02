@@ -24,6 +24,7 @@ public slots:
     void taskResult(QByteArray);
     void stateChanged(bool, QJsonDocument);
     void configChanged(bool, QJsonDocument);
+    void cycleChanged(bool, QJsonDocument);
 
 signals:
     void message(unsigned int level, QString message);

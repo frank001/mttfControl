@@ -14,6 +14,7 @@ void tcpClient::setSocket(qintptr descriptor){
 
     connect(m_Handler, &Handler::StateChanged, this, &tcpClient::stateChanged);
     connect(m_Handler, &Handler::ConfigChanged, this, &tcpClient::configChanged);
+    connect(m_Handler, &Handler::CycleChanged, this, &tcpClient::cycleChanged);
     connect(this, &tcpClient::message, m_Handler, &Handler::message);
 
 
@@ -54,6 +55,9 @@ void tcpClient::stateChanged(bool log, QJsonDocument jd) {
 }
 void tcpClient::configChanged(bool log, QJsonDocument jd) {
     QString test = jd.toJson();
+    socket->write(jd.toBinaryData());
+}
+void tcpClient::cycleChanged(bool log, QJsonDocument jd) {
     socket->write(jd.toBinaryData());
 }
 
